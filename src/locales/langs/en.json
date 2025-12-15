@@ -139,6 +139,11 @@
       "admin": "Admin",
       "user": "User"
     },
+    "tenant": {
+      "tencent": "Tencent Holdings Limited",
+      "baidu": "Baidu, Inc.",
+      "alibaba": "Alibaba (China) Co., Ltd"
+    },
     "placeholder": {
       "username": "Please enter your account",
       "password": "Please enter your password",

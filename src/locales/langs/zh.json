@@ -139,6 +139,11 @@
       "admin": "管理员",
       "user": "普通用户"
     },
+    "tenant": {
+      "tencent": "深圳市腾讯计算机系统有限公司",
+      "baidu": "百度在线网络技术（北京）有限公司",
+      "alibaba": "阿里巴巴（中国）有限公司"
+    },
     "placeholder": {
       "username": "请输入账号",
       "password": "请输入密码",

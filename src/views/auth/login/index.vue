@@ -19,7 +19,7 @@
             style="margin-top: 25px"
           >
             <ElFormItem prop="account">
-              <ElSelect v-model="formData.account" @change="setupAccount">
+              <ElSelect v-model="formData.tenant" @change="setupAccount">
                 <ElOption
                   v-for="account in accounts"
                   :key="account.key"
@@ -128,7 +128,7 @@
     formKey.value++
   })
 
-  type AccountKey = 'super' | 'admin' | 'user'
+  type AccountKey = 'tencent' | 'baidu' | 'alibaba'
 
   export interface Account {
     key: AccountKey
@@ -140,22 +140,22 @@
 
   const accounts = computed<Account[]>(() => [
     {
-      key: 'super',
-      label: t('login.roles.super'),
+      key: 'tencent',
+      label: t('login.tenant.tencent'),
       userName: 'Super',
       password: '123456',
       roles: ['R_SUPER']
     },
     {
-      key: 'admin',
-      label: t('login.roles.admin'),
+      key: 'baidu',
+      label: t('login.tenant.baidu'),
       userName: 'Admin',
       password: '123456',
       roles: ['R_ADMIN']
     },
     {
-      key: 'user',
-      label: t('login.roles.user'),
+      key: 'alibaba',
+      label: t('login.tenant.alibaba'),
       userName: 'User',
       password: '123456',
       roles: ['R_USER']
@@ -174,7 +174,7 @@
   const formRef = ref<FormInstance>()
 
   const formData = reactive({
-    account: '',
+    tenant: '',
     username: '',
     password: '',
     rememberPassword: true
@@ -188,13 +188,13 @@
   const loading = ref(false)
 
   onMounted(() => {
-    setupAccount('super')
+    setupAccount('tencent')
   })
 
   // 设置账号
   const setupAccount = (key: AccountKey) => {
     const selectedAccount = accounts.value.find((account: Account) => account.key === key)
-    formData.account = key
+    formData.tenant = key
     formData.username = selectedAccount?.userName ?? ''
     formData.password = selectedAccount?.password ?? ''
   }
@@ -219,7 +219,7 @@
       // 登录请求
       const { username, password } = formData
 
-      const { token, refreshToken } = await fetchLogin({
+      const { token } = await fetchLogin({
         userName: username,
         password
       })
@@ -230,7 +230,7 @@
       }
 
       // 存储 token 和登录状态
-      userStore.setToken(token, refreshToken)
+      userStore.setToken(token)
       userStore.setLoginStatus(true)
 
       // 登录成功处理
