@@ -19,7 +19,7 @@
         @refresh="handleRefresh"
       >
         <template #left>
-          <ElButton v-auth="'add'" @click="handleAddMenu" v-ripple> 添加菜单 </ElButton>
+          <ElButton type="primary" @click="handleAddMenu" v-ripple> 添加菜单 </ElButton>
           <ElButton @click="toggleExpand" v-ripple>
             {{ isExpanded ? '收起' : '展开' }}
           </ElButton>
@@ -148,6 +148,11 @@
   // 表格列配置
   const { columnChecks, columns } = useTableColumns(() => [
     {
+      prop: 'index',
+      label: 'ID',
+      visible: false
+    },
+    {
       prop: 'meta.title',
       label: '菜单名称',
       minWidth: 120,
@@ -178,11 +183,6 @@
         if (!row.meta?.authList?.length) return ''
         return `${row.meta.authList.length} 个权限标识`
       }
-    },
-    {
-      prop: 'date',
-      label: '编辑时间',
-      formatter: () => '2022-3-12 12:00:00'
     },
     {
       prop: 'status',
