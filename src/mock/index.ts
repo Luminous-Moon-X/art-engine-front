@@ -1,0 +1,3 @@
+import './tenant'
+
+export default {}

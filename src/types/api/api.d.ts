@@ -132,4 +132,44 @@ declare namespace Api {
         Api.Common.CommonSearchParams
     >
   }
+
+  /** 租户管理类型 */
+  namespace Tenant {
+    /** 租户列表项 */
+    interface TenantListItem {
+      id: number
+      tenantName: string
+      expireDate: string
+      enableFlag: boolean
+      createTime: string
+      description: string
+      adminName: string
+      adminAccount: string
+    }
+
+    /** 租户列表 */
+    type TenantList = Api.Common.PaginatedResponse<TenantListItem>
+
+    /** 租户搜索参数 */
+    interface TenantSearchParams extends Api.Common.CommonSearchParams {
+      name?: string
+      status?: boolean
+      expireDate?: string
+    }
+
+    /** 创建租户参数 */
+    interface CreateTenantParams {
+      name: string
+      expireDate: string
+      status: boolean
+      adminAccount: string
+      adminPassword?: string
+      description?: string
+    }
+
+    /** 更新租户参数 */
+    interface UpdateTenantParams extends Partial<CreateTenantParams> {
+      id: number
+    }
+  }
 }
