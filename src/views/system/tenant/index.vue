@@ -95,44 +95,9 @@
   import { useTable } from '@/hooks/core/useTable'
   import { fetchTenantList, deleteTenant, fetchMenuTree } from '@/api/tenant'
   import AddDialog from './modules/add-dialog.vue'
-  import { useTableColumns } from '@/hooks/core/useTableColumns'
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
 
   defineOptions({ name: 'TenantManagement' })
-
-  // 定义表格列
-  const { columnChecks, columns } = useTableColumns(() => [
-    { prop: 'id', label: '租户ID', visible: false },
-    { prop: 'tenantName', label: '租户名称', minWidth: 150 },
-    { prop: 'adminAccount', label: '管理员账号', width: 120 },
-    { prop: 'expireDate', label: '有效截止日期', width: 120 },
-    {
-      prop: 'enableFlag',
-      label: '是否启用',
-      width: 100,
-      formtter: (row: Api.Tenant.TenantListItem) =>
-        h(ElTag, { type: row.enableFlag ? 'success' : 'danger' }, row.enableFlag ? '启用' : '禁用')
-    },
-    { prop: 'createTime', label: '创建时间', width: 180 },
-    {
-      prop: 'operation',
-      label: '操作',
-      width: 200,
-      align: 'right',
-      formatter: (row: Api.Tenant.TenantListItem) => {
-        return h('div', { style: 'text-align: right' }, [
-          h(ArtButtonTable, {
-            type: 'edit',
-            onClick: () => handleEdit(row)
-          }),
-          h(ArtButtonTable, {
-            type: 'delete',
-            onClick: () => handleDelete(row)
-          })
-        ])
-      }
-    }
-  ])
 
   // --- 搜索相关 ---
   const searchBarRef = ref()
@@ -164,6 +129,8 @@
   // --- 表格相关 ---
   const {
     data,
+    columns,
+    columnChecks,
     loading,
     pagination,
     handleSizeChange,
@@ -181,13 +148,40 @@
       },
       immediate: true,
       columnsFactory: () => [
-        { prop: 'id', label: '租户ID', width: 80 },
-        { prop: 'name', label: '租户名称', minWidth: 150 },
+        { prop: 'id', label: '租户ID', visible: false },
+        { prop: 'tenantName', label: '租户名称', minWidth: 150 },
         { prop: 'adminAccount', label: '管理员账号', width: 120 },
-        { prop: 'expireDate', label: '有效截止日期', width: 120, sortable: true },
-        { prop: 'status', label: '状态', width: 100, useSlot: true },
+        { prop: 'expireDate', label: '有效截止日期', width: 120 },
+        {
+          prop: 'enableFlag',
+          label: '是否启用',
+          width: 100,
+          formatter: (row: Api.Tenant.TenantListItem) =>
+            h(
+              ElTag,
+              { type: row.enableFlag ? 'success' : 'danger' },
+              row.enableFlag ? '启用' : '禁用'
+            )
+        },
         { prop: 'createTime', label: '创建时间', width: 180 },
-        { prop: 'operation', label: '操作', width: 200, fixed: 'right', useSlot: true }
+        {
+          prop: 'operation',
+          label: '操作',
+          width: 200,
+          align: 'right',
+          formatter: (row: Api.Tenant.TenantListItem) => {
+            return h('div', { style: 'text-align: right' }, [
+              h(ArtButtonTable, {
+                type: 'edit',
+                onClick: () => handleEdit(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                onClick: () => handleDelete(row)
+              })
+            ])
+          }
+        }
       ]
     }
   })
