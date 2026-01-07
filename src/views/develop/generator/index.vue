@@ -58,10 +58,9 @@
     console.log('选中的表：', selectedRows.value)
   }
 
-  // 搜索组件配置相关
-  const initialSearchState = ref({
+  const initialSearchState = {
     tableName: ''
-  })
+  }
   const formFilters = reactive({ ...initialSearchState })
   const appliedFilters = reactive({ ...initialSearchState })
   const searchItems = computed(() => [
