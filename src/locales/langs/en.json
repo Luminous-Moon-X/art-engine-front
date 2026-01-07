@@ -147,6 +147,7 @@
     "placeholder": {
       "username": "Please enter your account",
       "password": "Please enter your password",
+      "tenant": "Please select your tenant",
       "slider": "Please slide to verify"
     },
     "sliderText": "Please slide to verify",

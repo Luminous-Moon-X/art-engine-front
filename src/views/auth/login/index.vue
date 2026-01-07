@@ -19,7 +19,7 @@
             style="margin-top: 25px"
           >
             <ElFormItem prop="account">
-              <ElSelect v-model="formData.tenant" @change="setupAccount">
+              <ElSelect v-model="formData.tenant" :placeholder="$t('login.placeholder.tenant')">
                 <ElOption
                   v-for="account in accounts"
                   :key="account.key"
@@ -180,24 +180,14 @@
     rememberPassword: true
   })
 
+  // 表单验证规则
   const rules = computed<FormRules>(() => ({
+    tenant: [{ required: true, message: t('login.placeholder.tenant'), trigger: 'change' }],
     username: [{ required: true, message: t('login.placeholder.username'), trigger: 'blur' }],
     password: [{ required: true, message: t('login.placeholder.password'), trigger: 'blur' }]
   }))
 
   const loading = ref(false)
-
-  onMounted(() => {
-    setupAccount('tencent')
-  })
-
-  // 设置账号
-  const setupAccount = (key: AccountKey) => {
-    const selectedAccount = accounts.value.find((account: Account) => account.key === key)
-    formData.tenant = key
-    formData.username = selectedAccount?.userName ?? ''
-    formData.password = selectedAccount?.password ?? ''
-  }
 
   // 登录
   const handleSubmit = async () => {

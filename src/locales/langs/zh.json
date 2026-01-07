@@ -147,6 +147,7 @@
     "placeholder": {
       "username": "请输入账号",
       "password": "请输入密码",
+      "tenant": "请选择租户",
       "slider": "请拖动滑块完成验证"
     },
     "sliderText": "按住滑块拖动",
