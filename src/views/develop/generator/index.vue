@@ -18,7 +18,9 @@
         @refresh="handleRefresh"
       >
         <template #left>
-          <ElButton type="primary" @click="generateCode" v-ripple> 生成代码 </ElButton>
+          <ElButton type="primary" :icon="MagicStick" @click="generateCode" v-ripple>
+            生成代码
+          </ElButton>
         </template>
       </ArtTableHeader>
       <ArtTable
@@ -32,6 +34,8 @@
         @pagination:current-change="handleCurrentChange"
       />
     </ElCard>
+
+    <CodeGenDialog v-model="dialogVisible" @generate="handleGenerate" />
   </div>
 </template>
 
@@ -40,8 +44,19 @@
   import { MagicStick } from '@element-plus/icons-vue'
   import type { CodeGeneratorRow } from '@/api/develop/generator'
   import { getTables } from '@/api/develop/generator'
+  import { ElButton } from 'element-plus'
+  import CodeGenDialog from './modules/code-gen-dialog.vue'
+  import type { GenerateCodeFormData } from './modules/code-gen-dialog.vue'
 
   defineOptions({ name: 'CodeGenerator' })
+
+  const dialogVisible = ref(false)
+  const selectedRows = ref<CodeGeneratorRow[]>([])
+
+  const handleGenerate = (data: GenerateCodeFormData) => {
+    console.log('生成代码参数：', data)
+    console.log('选中的表：', selectedRows.value)
+  }
 
   // 搜索组件配置相关
   const initialSearchState = ref({
@@ -64,6 +79,11 @@
   const handleSearch = (): void => {
     Object.assign(appliedFilters, { ...formFilters })
     // 执行查询
+    getTableList({
+      current: pagination.current,
+      size: pagination.size,
+      ...appliedFilters
+    })
   }
 
   // 表格数据
@@ -85,10 +105,11 @@
           ...appliedFilters
         },
         columnsFactory: () => [
+          { type: 'selection', width: 60 },
           { prop: 'id', label: 'ID', visible: false },
-          { prop: 'tableName', label: '数据表名', minWidth: 200 },
-          { prop: 'createTime', label: '创建时间', minWidth: 200 },
+          { prop: 'tableName', label: '数据表名', Width: 200 },
           { prop: 'tableDescription', label: '数据表描述' },
+          { prop: 'createTime', label: '创建时间', Width: 200 },
           {
             prop: 'operation',
             label: '操作',
@@ -96,29 +117,38 @@
             align: 'right',
             formatter: (row: any) => {
               return h('div', { style: 'text-align: right' }, [
-                h('el-button', {
-                  type: 'primary',
-                  text: '生成代码',
-                  icon: MagicStick,
-                  onClick: () => generateCode(row)
-                })
+                h(
+                  ElButton,
+                  {
+                    type: 'primary',
+                    icon: MagicStick,
+                    onClick: () => generateCode(row),
+                    text: true
+                  },
+                  '生成代码'
+                )
               ])
             }
           }
         ]
+      },
+      onSelectionChange: (selection: CodeGeneratorRow[]) => {
+        selectedRows.value = selection
       }
     })
   // 刷新表格数据
   const handleRefresh = (): void => {
-    getTableList()
+    getTableList({
+      current: pagination.current,
+      size: pagination.size,
+      ...appliedFilters
+    })
   }
 
   // 代码生成方法
   const generateCode = (rows: CodeGeneratorRow | CodeGeneratorRow[]): void => {
-    const tableNames = (Array.isArray(rows) ? rows : [rows]).map(
-      (row: CodeGeneratorRow) => row.tableName
-    )
-    console.log('待生成代码的表名列表：', tableNames)
+    selectedRows.value = Array.isArray(rows) ? rows : [rows]
+    dialogVisible.value = true
   }
 </script>
 
