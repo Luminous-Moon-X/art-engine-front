@@ -36,7 +36,7 @@ export class ComponentLoader {
       console.error(
         `[ComponentLoader] 未找到组件: ${componentPath}，尝试过的路径: ${fullPath} 和 ${fullPathWithIndex}`
       )
-      return this.createErrorComponent(componentPath)
+      return this.createErrorComponent()
     }
 
     return module
@@ -71,12 +71,7 @@ export class ComponentLoader {
   /**
    * 创建错误提示组件
    */
-  private createErrorComponent(componentPath: string): () => Promise<any> {
-    return () =>
-      Promise.resolve({
-        render() {
-          return h('div', { class: 'route-error' }, `组件未找到: ${componentPath}`)
-        }
-      })
+  private createErrorComponent(): () => Promise<any> {
+    return () => import('@/views/exception/404/index.vue')
   }
 }
