@@ -57,6 +57,7 @@
   import MenuDialog from './modules/menu-dialog.vue'
   import { fetchGetMenuList } from '@/api/system-manage'
   import { ElTag, ElMessageBox } from 'element-plus'
+  import type { MenuFormData } from './modules/menu-dialog.vue'
 
   defineOptions({ name: 'Menus' })
 
@@ -394,19 +395,6 @@
     }
     lockMenuType.value = false
     dialogVisible.value = true
-  }
-
-  /**
-   * 菜单表单数据类型
-   */
-  interface MenuFormData {
-    name: string
-    path: string
-    component?: string
-    icon?: string
-    roles?: string[]
-    sort?: number
-    [key: string]: any
   }
 
   /**

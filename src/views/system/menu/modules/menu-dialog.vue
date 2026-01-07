@@ -43,6 +43,7 @@
   import type { AppRouteRecord } from '@/types/router'
   import type { FormItem } from '@/components/core/forms/art-form/index.vue'
   import ArtForm from '@/components/core/forms/art-form/index.vue'
+  import ArtIconSelector from '@/components/core/base/art-icon-selector/index.vue'
   import { useWindowSize } from '@vueuse/core'
   import request from '@/utils/http'
 
@@ -69,7 +70,7 @@
       ])
   }
 
-  interface MenuFormData {
+  export interface MenuFormData {
     id: number
     navName: string
     navPath: string
@@ -179,7 +180,7 @@
         {
           label: '图标',
           key: 'navIcon',
-          type: 'input',
+          render: ArtIconSelector,
           props: { placeholder: '如：ri:user-line' }
         },
         {
