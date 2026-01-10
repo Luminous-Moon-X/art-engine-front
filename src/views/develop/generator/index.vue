@@ -18,7 +18,7 @@
         @refresh="handleRefresh"
       >
         <template #left>
-          <ElButton type="primary" :icon="MagicStick" @click="generateCode" v-ripple>
+          <ElButton type="primary" :icon="MagicStick" @click="generateCode(selectedRows)" v-ripple>
             生成代码
           </ElButton>
         </template>
@@ -32,10 +32,16 @@
         :pagination="pagination"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
+        @selection-change="handleSelectionChange"
       />
     </ElCard>
 
-    <CodeGenDialog v-model="dialogVisible" @generate="handleGenerate" />
+    <CodeGenDialog
+      v-model="dialogVisible"
+      :tables="tableData"
+      :defaultSelectedTables="selectedRows"
+      @generate="handleGenerate"
+    />
   </div>
 </template>
 
@@ -53,9 +59,9 @@
   const dialogVisible = ref(false)
   const selectedRows = ref<CodeGeneratorRow[]>([])
 
-  const handleGenerate = (data: GenerateCodeFormData) => {
+  const handleGenerate = (data: GenerateCodeFormData, tables: CodeGeneratorRow[]) => {
     console.log('生成代码参数：', data)
-    console.log('选中的表：', selectedRows.value)
+    console.log('选中的表：', tables)
   }
 
   const initialSearchState = {
@@ -92,6 +98,10 @@
     return getTables(params).then((res: CodeGeneratorRow[]) => {
       tableData.value = res
     })
+  }
+  // 处理选择变化
+  const handleSelectionChange = (selection: CodeGeneratorRow[]) => {
+    selectedRows.value = selection
   }
   // 表格配置
   const { loading, columns, pagination, columnChecks, handleSizeChange, handleCurrentChange } =
@@ -130,9 +140,6 @@
             }
           }
         ]
-      },
-      onSelectionChange: (selection: CodeGeneratorRow[]) => {
-        selectedRows.value = selection
       }
     })
   // 刷新表格数据
@@ -147,6 +154,10 @@
   // 代码生成方法
   const generateCode = (rows: CodeGeneratorRow | CodeGeneratorRow[]): void => {
     selectedRows.value = Array.isArray(rows) ? rows : [rows]
+    if (selectedRows.value.length === 0) {
+      ElMessage.warning('请至少选择一条数据')
+      return
+    }
     dialogVisible.value = true
   }
 </script>
