@@ -155,7 +155,7 @@
   const generateCode = (rows: CodeGeneratorRow | CodeGeneratorRow[]): void => {
     selectedRows.value = Array.isArray(rows) ? rows : [rows]
     if (selectedRows.value.length === 0) {
-      ElMessage.warning('请至少选择一条数据')
+      ElMessage.warning('请至少选择一条条数据表！')
       return
     }
     dialogVisible.value = true
