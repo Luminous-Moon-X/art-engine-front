@@ -76,6 +76,7 @@
     }).then((res) => {
       if (res) {
         ElMessage.success(`代码已成功生成并保存在${data.moduleName} - ${data.rootPackage}目录下！`)
+        dialogVisible.value = true
       } else {
         ElMessage.error('代码生成失败')
       }

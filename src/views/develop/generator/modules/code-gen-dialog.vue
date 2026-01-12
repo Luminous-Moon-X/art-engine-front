@@ -7,14 +7,16 @@
     class="code-gen-dialog"
     @closed="handleClosed"
   >
-    <div class="flex h-[550px] overflow-hidden rounded-lg border border-gray-100">
+    <div
+      class="flex h-[550px] overflow-hidden rounded-lg border border-[var(--el-border-color-light)]"
+    >
       <!-- 左侧：数据表选择 -->
-      <div class="flex w-[320px] flex-col bg-gray-50/50">
+      <div class="flex w-[320px] flex-col bg-[var(--el-fill-color-light)]">
         <div
-          class="flex items-center justify-between border-b border-gray-100 px-5 py-4 text-sm font-medium text-gray-900"
+          class="flex items-center justify-between border-b border-[var(--el-border-color-light)] px-5 py-4 text-sm font-medium text-[var(--el-text-color-primary)]"
         >
           <span>数据表选择</span>
-          <span class="text-xs font-normal text-gray-500"
+          <span class="text-xs font-normal text-[var(--el-text-color-secondary)]"
             >已选 {{ innerSelectedTables.length }} 项</span
           >
         </div>
@@ -25,13 +27,18 @@
             row-key="id"
             height="100%"
             class="custom-table"
-            :header-cell-style="{ background: 'transparent', color: '#666' }"
+            :header-cell-style="{
+              background: 'transparent',
+              color: 'var(--el-text-color-secondary)'
+            }"
             @selection-change="handleSelectionChange"
           >
             <ElTableColumn type="selection" width="40" />
             <ElTableColumn prop="tableName" label="表名" show-overflow-tooltip min-width="120">
               <template #default="{ row }">
-                <span class="font-medium text-gray-700">{{ row.tableName }}</span>
+                <span class="font-medium text-[var(--el-text-color-regular)]">{{
+                  row.tableName
+                }}</span>
               </template>
             </ElTableColumn>
             <ElTableColumn
@@ -41,7 +48,9 @@
               min-width="100"
             >
               <template #default="{ row }">
-                <span class="text-gray-500">{{ row.tableDescription }}</span>
+                <span class="text-[var(--el-text-color-secondary)]">{{
+                  row.tableDescription
+                }}</span>
               </template>
             </ElTableColumn>
           </ElTable>
@@ -49,8 +58,10 @@
       </div>
 
       <!-- 右侧：配置信息 -->
-      <div class="flex flex-1 flex-col bg-white">
-        <div class="border-b border-gray-100 px-8 py-4 text-sm font-medium text-gray-900">
+      <div class="flex flex-1 flex-col bg-[var(--el-bg-color)]">
+        <div
+          class="border-b border-[var(--el-border-color-light)] px-8 py-4 text-sm font-medium text-[var(--el-text-color-primary)]"
+        >
           生成配置
         </div>
         <div class="flex-1 overflow-y-auto px-8 py-6">
@@ -64,25 +75,31 @@
             <div class="grid grid-cols-2 gap-x-8">
               <ElFormItem label="模块名称" prop="moduleName">
                 <ElInput v-model="formData.moduleName" placeholder="例如：art-business" />
-                <div class="mt-1 text-xs text-gray-400">生成的模块名称，将作为项目子模块</div>
+                <div class="mt-1 text-xs text-[var(--el-text-color-placeholder)]">
+                  生成的模块名称，将作为项目子模块
+                </div>
               </ElFormItem>
 
               <ElFormItem label="根包路径" prop="rootPackage">
                 <ElInput v-model="formData.rootPackage" placeholder="例如：com.art" />
-                <div class="mt-1 text-xs text-gray-400">Java 代码的根包路径</div>
+                <div class="mt-1 text-xs text-[var(--el-text-color-placeholder)]">
+                  Java 代码的根包路径
+                </div>
               </ElFormItem>
 
               <ElFormItem label="作者名称" prop="authorName">
                 <ElInput v-model="formData.authorName" placeholder="例如：Art Engine" />
-                <div class="mt-1 text-xs text-gray-400">生成代码注释中的作者信息</div>
+                <div class="mt-1 text-xs text-[var(--el-text-color-placeholder)]">
+                  生成代码注释中的作者信息
+                </div>
               </ElFormItem>
             </div>
 
             <ElDivider class="!my-6" border-style="dashed" />
 
             <ElFormItem label="生成内容" prop="generateContent" class="mb-0">
-              <div class="w-full overflow-hidden rounded-lg bg-gray-50 p-4">
-                <ElCheckboxGroup v-model="formData.generateContent" class="custom-checkbox-group">
+              <div class="w-full overflow-hidden rounded-lg bg-[var(--el-fill-color-light)] p-4">
+                <ElCheckboxGroup v-model="formData.generateTypes" class="custom-checkbox-group">
                   <ElCheckboxButton label="Controller">Controller</ElCheckboxButton>
                   <ElCheckboxButton label="Service">Service</ElCheckboxButton>
                   <ElCheckboxButton label="Mapper">Mapper</ElCheckboxButton>
@@ -100,7 +117,7 @@
 
     <template #footer>
       <div class="flex items-center justify-between px-2 pt-2">
-        <div class="text-xs text-gray-400">
+        <div class="text-xs text-[var(--el-text-color-secondary)]">
           <ElIcon class="mr-1 translate-y-[1px]"><InfoFilled /></ElIcon>
           配置将应用于所有选中的数据表
         </div>
@@ -135,7 +152,7 @@
 
   export interface GenerateCodeFormData {
     moduleName: string
-    generateContent: string[]
+    generateTypes: string[]
     rootPackage: string
     authorName: string
   }
@@ -180,14 +197,14 @@
 
   const formData = reactive<GenerateCodeFormData>({
     moduleName: '',
-    generateContent: ['Controller', 'Service', 'Mapper', 'MapperXml', 'VO', 'BO', 'Entity'],
+    generateTypes: ['Controller', 'Service', 'Mapper', 'MapperXml', 'VO', 'BO', 'Entity'],
     rootPackage: '',
     authorName: ''
   })
 
   const rules = reactive<FormRules>({
     moduleName: [{ required: true, message: '请输入模块名称', trigger: 'blur' }],
-    generateContent: [
+    generateTypes: [
       {
         type: 'array',
         required: true,
@@ -214,7 +231,6 @@
     await formRef.value.validate((valid) => {
       if (valid) {
         emit('generate', { ...formData }, innerSelectedTables.value)
-        visible.value = false
       }
     })
   }
@@ -267,7 +283,8 @@
   :deep(.custom-checkbox-group .el-checkbox-button__inner) {
     padding: 9px 16px;
     font-size: 13px;
-    background: white;
+    color: var(--el-text-color-regular);
+    background: var(--el-bg-color);
     border: 1px solid var(--el-border-color);
     border-radius: 6px !important;
     box-shadow: none !important;
@@ -275,7 +292,7 @@
   }
 
   :deep(.custom-checkbox-group .el-checkbox-button.is-checked .el-checkbox-button__inner) {
-    color: white;
+    color: var(--el-color-white);
     background-color: var(--el-color-primary);
     border-color: var(--el-color-primary);
     box-shadow: 0 2px 6px var(--el-color-primary-light-5) !important;

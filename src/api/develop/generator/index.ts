@@ -21,5 +21,5 @@ export const getTables = (params: any): Promise<CodeGeneratorRow[]> =>
  * @returns 生成结果
  */
 export const generateCode = (params: any): Promise<boolean> => {
-  return request.post({ url: '/api/generator/generate', params: params })
+  return request.post({ url: '/api/generator/generate', data: params })
 }
