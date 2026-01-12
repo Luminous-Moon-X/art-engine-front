@@ -14,3 +14,12 @@ export interface CodeGeneratorRow {
  */
 export const getTables = (params: any): Promise<CodeGeneratorRow[]> =>
   request.get({ url: '/api/generator/tables', params: params })
+
+/**
+ * 生成代码
+ * @param params 生成代码参数
+ * @returns 生成结果
+ */
+export const generateCode = (params: any): Promise<boolean> => {
+  return request.post({ url: '/api/generator/generate', params: params })
+}

@@ -18,7 +18,12 @@
         @refresh="handleRefresh"
       >
         <template #left>
-          <ElButton type="primary" :icon="MagicStick" @click="generateCode(selectedRows)" v-ripple>
+          <ElButton
+            type="primary"
+            :icon="MagicStick"
+            @click="openGenerateDialog(selectedRows)"
+            v-ripple
+          >
             生成代码
           </ElButton>
         </template>
@@ -49,7 +54,7 @@
   import { useTable } from '@/hooks/core/useTable'
   import { MagicStick } from '@element-plus/icons-vue'
   import type { CodeGeneratorRow } from '@/api/develop/generator'
-  import { getTables } from '@/api/develop/generator'
+  import { getTables, generateCode } from '@/api/develop/generator'
   import { ElButton } from 'element-plus'
   import CodeGenDialog from './modules/code-gen-dialog.vue'
   import type { GenerateCodeFormData } from './modules/code-gen-dialog.vue'
@@ -59,9 +64,22 @@
   const dialogVisible = ref(false)
   const selectedRows = ref<CodeGeneratorRow[]>([])
 
+  /**
+   * 处理生成代码
+   * @param data 生成代码参数
+   * @param tables 选中的数据表
+   */
   const handleGenerate = (data: GenerateCodeFormData, tables: CodeGeneratorRow[]) => {
-    console.log('生成代码参数：', data)
-    console.log('选中的表：', tables)
+    generateCode({
+      ...data,
+      tableNames: tables.map((item) => item.tableName)
+    }).then((res) => {
+      if (res) {
+        ElMessage.success(`代码已成功生成并保存在${data.moduleName} - ${data.rootPackage}目录下！`)
+      } else {
+        ElMessage.error('代码生成失败')
+      }
+    })
   }
 
   const initialSearchState = {
@@ -131,7 +149,7 @@
                   {
                     type: 'primary',
                     icon: MagicStick,
-                    onClick: () => generateCode(row),
+                    onClick: () => openGenerateDialog(row),
                     text: true
                   },
                   '生成代码'
@@ -152,7 +170,7 @@
   }
 
   // 代码生成方法
-  const generateCode = (rows: CodeGeneratorRow | CodeGeneratorRow[]): void => {
+  const openGenerateDialog = (rows: CodeGeneratorRow | CodeGeneratorRow[]): void => {
     selectedRows.value = Array.isArray(rows) ? rows : [rows]
     if (selectedRows.value.length === 0) {
       ElMessage.warning('请至少选择一条条数据表！')
