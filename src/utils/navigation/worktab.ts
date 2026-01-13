@@ -27,6 +27,7 @@ import { isIframe } from './route'
 import { useSettingStore } from '@/store/modules/setting'
 import { IframeRouteManager } from '@/router/core'
 import { useCommon } from '@/hooks/core/useCommon'
+import { router } from '@/router'
 
 /**
  * 根据当前路由信息设置工作标签页（worktab）
@@ -62,6 +63,29 @@ export const setWorktab = (to: RouteLocationNormalized): void => {
         query,
         fixedTab: meta.fixedTab as boolean
       })
+    }
+
+    // 确保首页标签页始终存在
+    const homePath = useCommon().homePath.value
+    if (homePath && path !== homePath && useSettingStore().showWorkTab) {
+      const homeTab = worktabStore.getTab(homePath)
+      if (!homeTab) {
+        try {
+          const homeRoute = router.resolve(homePath)
+          if (homeRoute && !homeRoute.meta.isHideTab) {
+            worktabStore.openTab({
+              title: homeRoute.meta.title as string,
+              icon: homeRoute.meta.icon as string,
+              path: homePath,
+              name: homeRoute.name as string,
+              keepAlive: homeRoute.meta.keepAlive as boolean,
+              fixedTab: homeRoute.meta.fixedTab as boolean
+            })
+          }
+        } catch (error) {
+          console.warn('Failed to resolve home route:', error)
+        }
+      }
     }
   }
 }
