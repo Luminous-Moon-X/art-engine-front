@@ -93,6 +93,13 @@
                   生成代码注释中的作者信息
                 </div>
               </ElFormItem>
+
+              <ElFormItem label="表前缀" prop="tablePrefix">
+                <ElInput v-model="formData.tablePrefix" placeholder="例如：p_sys_" />
+                <div class="mt-1 text-xs text-[var(--el-text-color-placeholder)]">
+                  数据表名前缀，用于生成类名
+                </div>
+              </ElFormItem>
             </div>
 
             <ElDivider class="!my-6" border-style="dashed" />
@@ -155,6 +162,7 @@
     generateTypes: string[]
     rootPackage: string
     authorName: string
+    tablePrefix: string
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -199,7 +207,8 @@
     moduleName: '',
     generateTypes: ['Controller', 'Service', 'Mapper', 'MapperXml', 'VO', 'BO', 'Entity'],
     rootPackage: '',
-    authorName: ''
+    authorName: '',
+    tablePrefix: ''
   })
 
   const rules = reactive<FormRules>({
