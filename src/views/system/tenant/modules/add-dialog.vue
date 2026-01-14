@@ -31,6 +31,7 @@
           v-model="formData.adminAccount"
           placeholder="请输入管理员账号"
           :disabled="dialogType === 'edit'"
+          autocomplete="off"
         />
       </ElFormItem>
 
@@ -44,6 +45,7 @@
           type="password"
           placeholder="请输入密码"
           show-password
+          autocomplete="new-password"
           @input="checkPasswordStrength"
         />
         <div v-if="formData.adminPassword" class="mt-2">
