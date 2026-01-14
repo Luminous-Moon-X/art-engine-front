@@ -88,7 +88,7 @@
               </ElFormItem>
 
               <ElFormItem label="作者名称" prop="authorName">
-                <ElInput v-model="formData.authorName" placeholder="例如：Art Engine" />
+                <ElInput v-model="formData.authorName" placeholder="例如：Luminous.X" />
                 <div class="mt-1 text-xs text-[var(--el-text-color-placeholder)]">
                   生成代码注释中的作者信息
                 </div>
