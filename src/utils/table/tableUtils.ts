@@ -78,33 +78,33 @@ function extractTotal(obj: Record<string, unknown>, records: unknown[], fields: 
 function extractPagination(
   obj: Record<string, unknown>,
   data?: Record<string, unknown>
-): Pick<ApiResponse<unknown>, 'current' | 'size'> | undefined {
-  const result: Partial<Pick<ApiResponse<unknown>, 'current' | 'size'>> = {}
+): Pick<ApiResponse<unknown>, 'pageNumber' | 'pageSize'> | undefined {
+  const result: Partial<Pick<ApiResponse<unknown>, 'pageNumber' | 'pageSize'>> = {}
   const sources = [obj, data ?? {}]
 
   const currentFields = tableConfig.currentFields
   for (const src of sources) {
     for (const field of currentFields) {
       if (field in src && typeof src[field] === 'number') {
-        result.current = src[field] as number
+        result.pageNumber = src[field] as number
         break
       }
     }
-    if (result.current !== undefined) break
+    if (result.pageNumber !== undefined) break
   }
 
   const sizeFields = tableConfig.sizeFields
   for (const src of sources) {
     for (const field of sizeFields) {
       if (field in src && typeof src[field] === 'number') {
-        result.size = src[field] as number
+        result.pageSize = src[field] as number
         break
       }
     }
-    if (result.size !== undefined) break
+    if (result.pageSize !== undefined) break
   }
 
-  if (result.current === undefined && result.size === undefined) return undefined
+  if (result.pageNumber === undefined && result.pageSize === undefined) return undefined
   return result
 }
 
@@ -136,7 +136,7 @@ export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => 
   const res = response as Record<string, unknown>
   let records: T[] = []
   let total = 0
-  let pagination: Pick<ApiResponse<unknown>, 'current' | 'size'> | undefined
+  let pagination: Pick<ApiResponse<unknown>, 'pageNumber' | 'pageSize'> | undefined
 
   // 处理标准格式或直接列表
   records = extractRecords(res, recordFields)
@@ -162,7 +162,7 @@ export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => 
     console.warn('扩展字段请到 utils/table/tableConfig 文件配置')
   }
 
-  const result: ApiResponse<T> = { records, total }
+  const result: ApiResponse<T> = { records, totalRow: total }
   if (pagination) {
     Object.assign(result, pagination)
   }
@@ -184,15 +184,15 @@ export const updatePaginationFromResponse = <T>(
   pagination: Api.Common.PaginationParams,
   response: ApiResponse<T>
 ): void => {
-  pagination.total = response.total ?? pagination.total ?? 0
+  pagination.totalRow = response.totalRow ?? pagination.totalRow ?? 0
 
-  if (response.current !== undefined) {
-    pagination.current = response.current
+  if (response.pageNumber !== undefined) {
+    pagination.pageNumber = response.pageNumber
   }
 
-  const maxPage = Math.max(1, Math.ceil(pagination.total / (pagination.size || 1)))
-  if (pagination.current > maxPage) {
-    pagination.current = maxPage
+  const maxPage = Math.max(1, Math.ceil(pagination.totalRow / (pagination.pageSize || 1)))
+  if (pagination.pageNumber > maxPage) {
+    pagination.pageNumber = maxPage
   }
 }
 

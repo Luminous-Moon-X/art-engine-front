@@ -63,10 +63,10 @@
     >
       <ElPagination
         v-bind="mergedPaginationOptions"
-        :total="pagination?.total"
+        :total="pagination?.totalRow"
         :disabled="loading"
-        :page-size="pagination?.size"
-        :current-page="pagination?.current"
+        :page-size="pagination?.pageSize"
+        :current-page="pagination?.pageNumber"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
@@ -96,11 +96,11 @@
   /** 分页配置接口 */
   interface PaginationConfig {
     /** 当前页码 */
-    current: number
+    pageNumber: number
     /** 每页显示条目个数 */
-    size: number
+    pageSize: number
     /** 总条目数 */
-    total: number
+    totalRow: number
   }
 
   /** 分页器配置选项接口 */
@@ -287,8 +287,8 @@
   // 全局序号
   const getGlobalIndex = (index: number) => {
     if (!props.pagination) return index + 1
-    const { current, size } = props.pagination
-    return (current - 1) * size + index + 1
+    const { pageNumber, pageSize } = props.pagination
+    return (pageNumber - 1) * pageSize + index + 1
   }
 
   const emit = defineEmits<{

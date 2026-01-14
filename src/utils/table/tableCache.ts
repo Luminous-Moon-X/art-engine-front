@@ -51,8 +51,9 @@ export interface ApiResponse<T = unknown> {
   records?: T[]
   data?: T[]
   total?: number
-  current?: number
-  size?: number
+  pageNumber?: number
+  pageSize?: number
+  totalRow?: number
   [key: string]: unknown
 }
 
@@ -103,7 +104,7 @@ export class TableCache<T> {
     // 添加搜索条件标签
     const searchKeys = Object.keys(params).filter(
       (key) =>
-        !['current', 'size', 'total'].includes(key) &&
+        !['pageNumber', 'pageSize', 'totalRow'].includes(key) &&
         params[key] !== undefined &&
         params[key] !== '' &&
         params[key] !== null
@@ -117,7 +118,7 @@ export class TableCache<T> {
     }
 
     // 添加分页标签
-    tags.add(`pagination:${params.size || 10}`)
+    tags.add(`pagination:${params.pageSize || 10}`)
     // 添加通用分页标签，用于清理所有分页缓存
     tags.add('pagination')
 

@@ -5,8 +5,8 @@ import request from '@/utils/http'
  */
 export function fetchTenantList(params: Api.Tenant.TenantSearchParams) {
   return request.get<Api.Tenant.TenantList>({
-    url: '/api/system/tenant/list',
-    params
+    url: '/api/tenant/page',
+    params: params
   })
 }
 
@@ -15,7 +15,7 @@ export function fetchTenantList(params: Api.Tenant.TenantSearchParams) {
  */
 export function createTenant(data: Api.Tenant.CreateTenantParams) {
   return request.post<Api.Tenant.TenantListItem>({
-    url: '/api/system/tenant/create',
+    url: '/api/tenant/create',
     data
   })
 }
@@ -25,7 +25,7 @@ export function createTenant(data: Api.Tenant.CreateTenantParams) {
  */
 export function updateTenant(data: Api.Tenant.UpdateTenantParams) {
   return request.put<Api.Tenant.TenantListItem>({
-    url: '/api/system/tenant/update',
+    url: '/api/tenant/update',
     data
   })
 }
@@ -34,8 +34,8 @@ export function updateTenant(data: Api.Tenant.UpdateTenantParams) {
  * 删除租户
  */
 export function deleteTenant(id: number) {
-  return request.delete({
-    url: '/api/system/tenant/delete',
+  return request.del({
+    url: '/api/tenant/delete',
     params: { id }
   })
 }
@@ -45,6 +45,6 @@ export function deleteTenant(id: number) {
  */
 export function fetchMenuTree() {
   return request.get<any[]>({
-    url: '/api/system/tenant/menus'
+    url: '/api/tenant/menus'
   })
 }

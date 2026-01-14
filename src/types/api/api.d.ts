@@ -38,22 +38,22 @@ declare namespace Api {
     /** 分页参数 */
     interface PaginationParams {
       /** 当前页码 */
-      current: number
+      pageNumber: number
       /** 每页条数 */
-      size: number
+      pageSize: number
       /** 总条数 */
-      total: number
+      totalRow: number
     }
 
     /** 通用搜索参数 */
-    type CommonSearchParams = Pick<PaginationParams, 'current' | 'size'>
+    type CommonSearchParams = Pick<PaginationParams, 'pageNumber' | 'pageSize'>
 
     /** 分页响应基础结构 */
     interface PaginatedResponse<T = any> {
       records: T[]
-      current: number
-      size: number
-      total: number
+      pageNumber: number
+      pageSize: number
+      totalRow: number
     }
 
     /** 启用状态 */
