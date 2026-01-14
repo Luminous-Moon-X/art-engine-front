@@ -104,8 +104,8 @@
     Object.assign(appliedFilters, { ...formFilters })
     // 执行查询
     getTableList({
-      current: pagination.current,
-      size: pagination.size,
+      current: pagination.pageNumber,
+      size: pagination.pageSize,
       ...appliedFilters
     })
   }
@@ -128,8 +128,8 @@
       core: {
         apiFn: getTableList,
         apiParams: {
-          current: 1,
-          size: 20,
+          pageNumber: 1,
+          pageSize: 20,
           ...appliedFilters
         },
         columnsFactory: () => [
@@ -164,8 +164,8 @@
   // 刷新表格数据
   const handleRefresh = (): void => {
     getTableList({
-      current: pagination.current,
-      size: pagination.size,
+      pageNumber: pagination.pageNumber,
+      pageSize: pagination.pageSize,
       ...appliedFilters
     })
   }

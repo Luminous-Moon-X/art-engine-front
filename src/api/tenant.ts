@@ -4,7 +4,7 @@ import request from '@/utils/http'
  * 获取租户列表
  */
 export function fetchTenantList(params: Api.Tenant.TenantSearchParams) {
-  return request.get<Api.Tenant.TenantList>({
+  return request.post<Api.Tenant.TenantList>({
     url: '/api/tenant/page',
     params: params
   })

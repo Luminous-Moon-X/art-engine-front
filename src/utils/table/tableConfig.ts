@@ -45,11 +45,11 @@ export const tableConfig = {
   sizeFields: ['size', 'pageSize', 'limit'],
 
   // 请求参数映射配置，前端发送请求时使用的分页参数名
-  // useTable 组合式函数传递分页参数的时候 用 current 跟 size
+  // useTable 组合式函数传递分页参数的时候 用 pageNumber 跟 pageSize
   paginationKey: {
     // 当前页码
-    pageNumber: 'current',
+    pageNumber: 'pageNumber',
     // 每页大小
-    pageSize: 'size'
+    pageSize: 'pageSize'
   }
 }
