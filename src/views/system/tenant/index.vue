@@ -69,7 +69,6 @@
   defineOptions({ name: 'TenantManagement' })
 
   // --- 搜索相关 ---
-  const searchBarRef = ref()
   const searchFormState = ref({
     tenantName: '',
     enableFlag: undefined
