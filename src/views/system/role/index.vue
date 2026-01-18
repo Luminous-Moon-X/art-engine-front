@@ -1,24 +1,19 @@
 <!-- 角色管理页面 -->
 <template>
   <div class="art-full-height">
-    <RoleSearch
-      v-show="showSearchBar"
-      v-model="searchForm"
+    <!-- 搜索区域 -->
+    <ArtSearchBar
+      ref="searchBarRef"
+      v-model="searchFormState"
+      :items="searchItems"
+      :show-reset-button="true"
+      :show-search-button="true"
       @search="handleSearch"
-      @reset="resetSearchParams"
-    ></RoleSearch>
+      @reset="handleReset"
+    />
 
-    <ElCard
-      class="art-table-card"
-      shadow="never"
-      :style="{ 'margin-top': showSearchBar ? '12px' : '0' }"
-    >
-      <ArtTableHeader
-        v-model:columns="columnChecks"
-        v-model:showSearchBar="showSearchBar"
-        :loading="loading"
-        @refresh="refreshData"
-      >
+    <ElCard class="art-table-card" shadow="never">
+      <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
             <ElButton @click="showDialog('add')" v-ripple>新增角色</ElButton>
@@ -60,7 +55,6 @@
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetRoleList } from '@/api/system-manage'
   import ArtButtonMore from '@/components/core/forms/art-button-more/index.vue'
-  import RoleSearch from './modules/role-search.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
   import { ElTag, ElMessageBox } from 'element-plus'
@@ -69,16 +63,26 @@
 
   type RoleListItem = Api.SystemManage.RoleListItem
 
-  // 搜索表单
-  const searchForm = ref({
-    roleName: undefined,
-    roleCode: undefined,
-    description: undefined,
-    enabled: undefined,
-    daterange: undefined
+  // --- 搜索相关 ---
+  const searchFormState = ref({
+    roleName: '',
+    roleCode: ''
   })
 
-  const showSearchBar = ref(false)
+  const searchItems = computed(() => [
+    {
+      key: 'roleName',
+      label: '角色名称',
+      type: 'input',
+      props: { placeholder: '请输入角色名称' }
+    },
+    {
+      key: 'roleCode',
+      label: '角色编码',
+      type: 'input',
+      props: { placeholder: '请输入角色编码' }
+    }
+  ])
 
   const dialogVisible = ref(false)
   const permissionDialog = ref(false)
@@ -101,8 +105,8 @@
     core: {
       apiFn: fetchGetRoleList,
       apiParams: {
-        current: 1,
-        size: 20
+        pageNumber: 1,
+        pageSize: 20
       },
       // 排除 apiParams 中的属性
       excludeParams: ['daterange'],
@@ -129,11 +133,11 @@
           showOverflowTooltip: true
         },
         {
-          prop: 'enabled',
-          label: '角色状态',
+          prop: 'enable_flag',
+          label: '是否启用',
           width: 100,
           formatter: (row) => {
-            const statusConfig = row.enabled
+            const statusConfig = row.enableFlag
               ? { type: 'success', text: '启用' }
               : { type: 'warning', text: '禁用' }
             return h(
@@ -193,16 +197,15 @@
 
   /**
    * 搜索处理
-   * @param params 搜索参数
    */
-  const handleSearch = (params: Record<string, any>) => {
-    // 处理日期区间参数，把 daterange 转换为 startTime 和 endTime
-    const { daterange, ...filtersParams } = params
-    const [startTime, endTime] = Array.isArray(daterange) ? daterange : [null, null]
-
+  const handleSearch = () => {
     // 搜索参数赋值
-    Object.assign(searchParams, { ...filtersParams, startTime, endTime })
+    Object.assign(searchParams, searchFormState.value)
     getData()
+  }
+
+  const handleReset = () => {
+    resetSearchParams()
   }
 
   const buttonMoreClick = (item: ButtonMoreItem, row: RoleListItem) => {
