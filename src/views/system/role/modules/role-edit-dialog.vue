@@ -2,7 +2,7 @@
   <ElDialog
     v-model="visible"
     :title="dialogType === 'add' ? '新增角色' : '编辑角色'"
-    width="30%"
+    width="50%"
     align-center
     @close="handleClose"
   >
@@ -13,16 +13,16 @@
       <ElFormItem label="角色编码" prop="roleCode">
         <ElInput v-model="form.roleCode" placeholder="请输入角色编码" />
       </ElFormItem>
-      <ElFormItem label="描述" prop="description">
+      <ElFormItem label="描述" prop="roleDescription">
         <ElInput
-          v-model="form.description"
+          v-model="form.roleDescription"
           type="textarea"
           :rows="3"
           placeholder="请输入角色描述"
         />
       </ElFormItem>
       <ElFormItem label="启用">
-        <ElSwitch v-model="form.enabled" />
+        <ElSwitch v-model="form.enableFlag" />
       </ElFormItem>
     </ElForm>
     <template #footer>
@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
   import type { FormInstance, FormRules } from 'element-plus'
+  import { addRole, editRole } from '@/api/role'
 
   type RoleListItem = Api.SystemManage.RoleListItem
 
@@ -77,20 +78,19 @@
     roleCode: [
       { required: true, message: '请输入角色编码', trigger: 'blur' },
       { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-    ],
-    description: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
+    ]
   })
 
   /**
    * 表单数据
    */
   const form = reactive<RoleListItem>({
-    roleId: 0,
+    id: null,
     roleName: '',
     roleCode: '',
-    description: '',
+    roleDescription: '',
     createTime: '',
-    enabled: true
+    enableFlag: true
   })
 
   /**
@@ -123,12 +123,12 @@
       Object.assign(form, props.roleData)
     } else {
       Object.assign(form, {
-        roleId: 0,
+        id: null,
         roleName: '',
         roleCode: '',
-        description: '',
+        roleDescription: '',
         createTime: '',
-        enabled: true
+        enableFlag: true
       })
     }
   }
@@ -150,11 +150,21 @@
 
     try {
       await formRef.value.validate()
-      // TODO: 调用新增/编辑接口
+      // 调用新增/编辑接口
       const message = props.dialogType === 'add' ? '新增成功' : '修改成功'
-      ElMessage.success(message)
-      emit('success')
-      handleClose()
+      let res: Promise<boolean>
+      if (props.dialogType === 'add') {
+        res = addRole(form)
+      } else {
+        res = editRole(form)
+      }
+      res.then((res) => {
+        if (res) {
+          ElMessage.success(message)
+          emit('success')
+          handleClose()
+        }
+      })
     } catch (error) {
       console.log('表单验证失败:', error)
     }

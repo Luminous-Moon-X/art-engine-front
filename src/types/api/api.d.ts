@@ -118,18 +118,17 @@ declare namespace Api {
 
     /** 角色列表项 */
     interface RoleListItem {
-      id: number
+      id: number | null
       roleName: string
       roleCode: string
-      description: string
-      enabled: boolean
+      roleDescription: string
       createTime: string
       enableFlag: boolean
     }
 
     /** 角色搜索参数 */
     type RoleSearchParams = Partial<
-      Pick<RoleListItem, 'id' | 'roleName' | 'roleCode' | 'description' | 'enableFlag'> &
+      Pick<RoleListItem, 'id' | 'roleName' | 'roleCode' | 'roleDescription' | 'enableFlag'> &
         Api.Common.CommonSearchParams
     >
   }

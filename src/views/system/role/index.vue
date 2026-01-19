@@ -53,7 +53,7 @@
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetRoleList } from '@/api/system-manage'
+  import { fetchGetRoleList } from '@/api/role'
   import ArtButtonMore from '@/components/core/forms/art-button-more/index.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
@@ -114,7 +114,7 @@
         {
           prop: 'roleId',
           label: '角色ID',
-          width: 100
+          visible: false
         },
         {
           prop: 'roleName',
@@ -127,7 +127,7 @@
           minWidth: 120
         },
         {
-          prop: 'description',
+          prop: 'roleDescription',
           label: '角色描述',
           minWidth: 150,
           showOverflowTooltip: true
