@@ -2,7 +2,7 @@
   <ElDialog
     v-model="visible"
     :title="dialogType === 'add' ? '新增角色' : '编辑角色'"
-    width="50%"
+    width="35%"
     align-center
     @close="handleClose"
   >
@@ -11,7 +11,11 @@
         <ElInput v-model="form.roleName" placeholder="请输入角色名称" />
       </ElFormItem>
       <ElFormItem label="角色编码" prop="roleCode">
-        <ElInput v-model="form.roleCode" placeholder="请输入角色编码" />
+        <ElInput
+          v-model="form.roleCode"
+          placeholder="请输入角色编码"
+          :disabled="dialogType === 'edit'"
+        />
       </ElFormItem>
       <ElFormItem label="描述" prop="roleDescription">
         <ElInput

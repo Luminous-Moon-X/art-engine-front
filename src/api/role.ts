@@ -23,3 +23,11 @@ export function editRole(params: Api.SystemManage.RoleListItem) {
     data: params
   })
 }
+
+// 删除角色
+export function delRole(id: number) {
+  return request.del<boolean>({
+    url: '/api/role/delete',
+    data: { ids: [id] }
+  })
+}

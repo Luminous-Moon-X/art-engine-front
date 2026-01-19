@@ -40,23 +40,14 @@
       :role-data="currentRoleData"
       @success="refreshData"
     />
-
-    <!-- 菜单权限弹窗 -->
-    <RolePermissionDialog
-      v-model="permissionDialog"
-      :role-data="currentRoleData"
-      @success="refreshData"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetRoleList } from '@/api/role'
-  import ArtButtonMore from '@/components/core/forms/art-button-more/index.vue'
+  import { fetchGetRoleList, delRole } from '@/api/role'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
-  import RolePermissionDialog from './modules/role-permission-dialog.vue'
   import { ElTag, ElMessageBox } from 'element-plus'
 
   defineOptions({ name: 'Role' })
@@ -85,9 +76,9 @@
   ])
 
   const dialogVisible = ref(false)
-  const permissionDialog = ref(false)
   const currentRoleData = ref<RoleListItem | undefined>(undefined)
 
+  // 表格相关
   const {
     columns,
     columnChecks,
@@ -119,12 +110,12 @@
         {
           prop: 'roleName',
           label: '角色名称',
-          minWidth: 120
+          width: 300
         },
         {
           prop: 'roleCode',
           label: '角色编码',
-          minWidth: 120
+          width: 250
         },
         {
           prop: 'roleDescription',
@@ -135,7 +126,7 @@
         {
           prop: 'enable_flag',
           label: '是否启用',
-          width: 100,
+          width: 140,
           formatter: (row) => {
             const statusConfig = row.enableFlag
               ? { type: 'success', text: '启用' }
@@ -150,36 +141,23 @@
         {
           prop: 'createTime',
           label: '创建日期',
-          width: 180,
+          width: 380,
           sortable: true
         },
         {
           prop: 'operation',
           label: '操作',
-          width: 80,
+          width: 120,
           fixed: 'right',
           formatter: (row) =>
-            h('div', [
-              h(ArtButtonMore, {
-                list: [
-                  {
-                    key: 'permission',
-                    label: '菜单权限',
-                    icon: 'ri:user-3-line'
-                  },
-                  {
-                    key: 'edit',
-                    label: '编辑角色',
-                    icon: 'ri:edit-2-line'
-                  },
-                  {
-                    key: 'delete',
-                    label: '删除角色',
-                    icon: 'ri:delete-bin-4-line',
-                    color: '#f56c6c'
-                  }
-                ],
-                onClick: (item: ButtonMoreItem) => buttonMoreClick(item, row)
+            h('div', { style: 'text-align: right' }, [
+              h(ArtButtonTable, {
+                type: 'edit',
+                onClick: () => handleEdit(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                onClick: () => handleDelete(row)
               })
             ])
         }
@@ -187,8 +165,10 @@
     }
   })
 
+  // 弹窗类型 新增or修改
   const dialogType = ref<'add' | 'edit'>('add')
 
+  // 打开新增/修改弹窗
   const showDialog = (type: 'add' | 'edit', row?: RoleListItem) => {
     dialogVisible.value = true
     dialogType.value = type
@@ -204,39 +184,30 @@
     getData()
   }
 
+  // 重置查询条件
   const handleReset = () => {
     resetSearchParams()
   }
 
-  const buttonMoreClick = (item: ButtonMoreItem, row: RoleListItem) => {
-    switch (item.key) {
-      case 'permission':
-        showPermissionDialog(row)
-        break
-      case 'edit':
-        showDialog('edit', row)
-        break
-      case 'delete':
-        deleteRole(row)
-        break
-    }
+  // 编辑角色
+  const handleEdit = (row: RoleListItem) => {
+    showDialog('edit', row)
   }
 
-  const showPermissionDialog = (row?: RoleListItem) => {
-    permissionDialog.value = true
-    currentRoleData.value = row
-  }
-
-  const deleteRole = (row: RoleListItem) => {
+  // 删除角色
+  const handleDelete = (row: RoleListItem) => {
     ElMessageBox.confirm(`确定删除角色"${row.roleName}"吗？此操作不可恢复！`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
       .then(() => {
-        // TODO: 调用删除接口
-        ElMessage.success('删除成功')
-        refreshData()
+        delRole(row.id as number).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            refreshData()
+          }
+        })
       })
       .catch(() => {
         ElMessage.info('已取消删除')
