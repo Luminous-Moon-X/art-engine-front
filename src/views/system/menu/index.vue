@@ -16,22 +16,27 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton @click="showDialog('menu', true)" v-ripple>添加菜单</ElButton>
+            <ElButton type="primary" @click="showDialog('menu', true)" v-ripple>添加菜单</ElButton>
+            <ElButton @click="toggleExpand" v-ripple>
+              {{ isExpanded ? '收起' : '展开' }}
+            </ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
 
       <!-- 表格 -->
       <ArtTable
+        ref="tableRef"
         :loading="loading"
         :data="data"
         :columns="columns"
+        :stripe="false"
+        rowKey="id"
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        :default-expand-all="false"
         :pagination="pagination"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
-        :stripe="false"
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-        :default-expand-all="false"
       >
       </ArtTable>
     </ElCard>
@@ -57,6 +62,7 @@
   import { fetchGetMenuList, delMenu } from '@/api/menu'
 
   defineOptions({ name: 'Menus' })
+  const tableRef = ref()
 
   // --- 搜索相关 ---
   const searchFormState = ref({
@@ -190,6 +196,7 @@
 
   // 打开新增/修改弹窗
   const showDialog = (type: 'menu' | 'button', lockType: boolean, row?: MenuRowItem) => {
+    parentId.value = -1
     dialogVisible.value = true
     dialogType.value = type
     lockMenuType.value = lockType
@@ -254,7 +261,11 @@
     row: MenuRowItem
   ): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
     if (row.menuType === 'button') return 'danger'
-    if (row.children?.length) return 'info'
+    if (row.children?.length) {
+      if (row.children.find((item) => item.menuType === 'menu')) {
+        return 'info'
+      }
+    }
     if (row.externalLink && row.iframeFlag) return 'success'
     if (row.routePath) return 'primary'
     if (row.externalLink) return 'warning'
@@ -268,10 +279,35 @@
    */
   const getMenuTypeText = (row: MenuRowItem): string => {
     if (row.menuType === 'button') return '按钮'
-    if (row.children?.length) return '目录'
+    if (row.children?.length) {
+      if (row.children.find((item) => item.menuType === 'menu')) {
+        return '目录'
+      }
+    }
     if (row.externalLink && row.iframeFlag) return '内嵌'
     if (row.routePath) return '菜单'
     if (row.externalLink) return '外链'
     return '未知'
+  }
+
+  /**
+   * 切换展开/收起所有菜单
+   */
+  const isExpanded = ref(false)
+  const toggleExpand = (): void => {
+    isExpanded.value = !isExpanded.value
+    nextTick(() => {
+      if (tableRef.value?.elTableRef && data.value) {
+        const processRows = (rows: MenuRowItem[]) => {
+          rows.forEach((row) => {
+            if (row.children?.length) {
+              tableRef.value.elTableRef.toggleRowExpansion(row, isExpanded.value)
+              processRows(row.children)
+            }
+          })
+        }
+        processRows(data.value)
+      }
+    })
   }
 </script>

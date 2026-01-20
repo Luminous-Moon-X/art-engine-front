@@ -12,6 +12,6 @@ export function fetchGetUserList(params: Api.SystemManage.UserSearchParams) {
 // 获取菜单列表
 export function fetchGetMenuList() {
   return request.get<AppRouteRecord[]>({
-    url: '/api/nav/navTree'
+    url: '/api/menu/menuTree'
   })
 }

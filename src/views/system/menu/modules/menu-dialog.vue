@@ -7,6 +7,7 @@
     align-center
     class="menu-dialog"
     @closed="handleClosed"
+    destroy-on-close
   >
     <ArtForm
       ref="formRef"
@@ -94,7 +95,7 @@
   const emit = defineEmits<Emits>()
 
   const formRef = ref()
-  const isEdit = computed(() => form.id !== null)
+  const isEdit = computed(() => form.id !== null && props.parentId === -1)
 
   const form = reactive<MenuRowItem & { menuType: 'menu' | 'button' }>({
     id: null,
