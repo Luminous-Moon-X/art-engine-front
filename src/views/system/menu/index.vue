@@ -132,6 +132,11 @@
           }
         },
         {
+          prop: 'orderNum',
+          label: '排序',
+          width: 80
+        },
+        {
           prop: 'routePath',
           label: '路由',
           formatter: (row: MenuRowItem) => {
