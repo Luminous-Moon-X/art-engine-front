@@ -16,7 +16,7 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增字典</ElButton>
+            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增字典项</ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -33,11 +33,12 @@
       </ArtTable>
 
       <!-- 字典编辑弹窗 -->
-      <DictEditDialog
+      <DictValueEditDialog
         v-model="dialogVisible"
         :dialog-type="dialogType"
-        :dict-data="currentDictData"
+        :dict-data="currentDictValueData"
         @success="refreshData"
+        :dict-id="dictId"
       />
     </ElCard>
   </div>
@@ -45,40 +46,49 @@
 
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetDictList, delDict } from '@/api/dict'
+  import { fetchGetDictValueList, delDictValue } from '@/api/dict'
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import { ElTag, ElMessageBox, ElButton } from 'element-plus'
-  import { DictRowItem } from '@/types/dict'
-  import DictEditDialog from './modules/dict-edit-dialog.vue'
-  import { useRouter } from 'vue-router'
+  import { DictValueRowItem } from '@/types/dict'
+  import DictValueEditDialog from './modules/dict-value-edit-dialog.vue'
+  import { useRoute } from 'vue-router'
 
-  defineOptions({ name: 'Dict' })
+  defineOptions({ name: 'DictValue' })
 
-  const router = useRouter()
+  const route = useRoute()
+  // 字典ID
+  const dictId = ref()
+
+  onMounted(() => {
+    dictId.value = route.query.dictId as unknown as number
+    handleSearch()
+  })
 
   // --- 搜索相关 ---
   const searchFormState = ref({
-    dictName: '',
-    dictCode: ''
+    dictLabel: '',
+    dictValue: '',
+    dictId: ''
   })
 
   const searchItems = computed(() => [
     {
-      key: 'dictName',
-      label: '字典名称',
+      key: 'dictLabel',
+      label: '字典项名称',
       type: 'input',
-      props: { placeholder: '请输入字典名称' }
+      labelWidth: 90,
+      props: { placeholder: '请输入字典项名称' }
     },
     {
-      key: 'dictCode',
-      label: '字典编码',
+      key: 'dictValue',
+      label: '字典项值',
       type: 'input',
-      props: { placeholder: '请输入字典编码' }
+      props: { placeholder: '请输入字典项值' }
     }
   ])
 
   const dialogVisible = ref(false)
-  const currentDictData = ref<DictRowItem | undefined>(undefined)
+  const currentDictValueData = ref<DictValueRowItem | undefined>(undefined)
 
   // 表格相关
   const {
@@ -96,7 +106,8 @@
   } = useTable({
     // 核心配置
     core: {
-      apiFn: fetchGetDictList,
+      apiFn: fetchGetDictValueList,
+      immediate: false,
       apiParams: {
         pageNumber: 1,
         pageSize: 10
@@ -110,58 +121,27 @@
           visible: false
         },
         {
-          prop: 'dictCode',
-          label: '字典编码',
-          width: 160
+          prop: 'dictLabel',
+          label: '字典项名称',
+          minWidth: 200
         },
         {
-          prop: 'dictName',
-          label: '字典名称',
-          width: 250,
-          formatter: (row: DictRowItem) => {
-            return h(
-              ElButton,
-              { type: 'primary', link: true, onClick: () => handleDictValue(row) },
-              () => row.dictName
-            )
-          }
-        },
-        {
-          prop: 'dictType',
-          label: '字典类型',
-          width: 150,
-          formatter: (row: DictRowItem) => {
-            const typeConfig =
-              row.dictType === 'system'
-                ? { type: 'primary', text: '系统字典' }
-                : { type: 'info', text: '普通字典' }
-            return h(ElTag, { type: typeConfig.type as 'primary' | 'info' }, () => typeConfig.text)
-          }
-        },
-        {
-          prop: 'enableFlag',
-          label: '是否启用',
-          width: 140,
-          formatter: (row: DictRowItem) => {
-            const statusConfig = row.enableFlag
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
-            return h(
-              ElTag,
-              { type: statusConfig.type as 'success' | 'warning' },
-              () => statusConfig.text
-            )
-          }
-        },
-        {
-          prop: 'createTime',
-          label: '创建时间',
+          prop: 'dictValue',
+          label: '字典项值',
           width: 200
         },
         {
-          prop: 'remark',
-          label: '备注',
-          minWidth: 250
+          prop: 'orderNum',
+          label: '排序号',
+          width: 100
+        },
+        {
+          prop: 'showStyle',
+          label: '显示样式',
+          width: 150,
+          formatter: (row: DictValueRowItem) => {
+            return h(ElTag, { type: row.showStyle }, () => row.showStyle)
+          }
         },
         {
           prop: 'operation',
@@ -189,10 +169,10 @@
   const dialogType = ref<'add' | 'edit'>('add')
 
   // 打开新增/修改弹窗
-  const showDialog = (type: 'add' | 'edit', row?: DictRowItem) => {
+  const showDialog = (type: 'add' | 'edit', row?: DictValueRowItem) => {
     dialogVisible.value = true
     dialogType.value = type
-    currentDictData.value = row
+    currentDictValueData.value = row
   }
 
   /**
@@ -200,6 +180,7 @@
    */
   const handleSearch = () => {
     // 搜索参数赋值
+    searchFormState.value.dictId = dictId.value
     Object.assign(searchParams, searchFormState.value)
     getData()
   }
@@ -210,19 +191,19 @@
   }
 
   // 编辑字典
-  const handleEdit = (row: DictRowItem) => {
+  const handleEdit = (row: DictValueRowItem) => {
     showDialog('edit', row)
   }
 
   // 删除字典
-  const handleDelete = (row: DictRowItem) => {
-    ElMessageBox.confirm(`确定删除字典"${row.dictName}"吗？此操作不可恢复！`, '删除确认', {
+  const handleDelete = (row: DictValueRowItem) => {
+    ElMessageBox.confirm(`确定删除字典项"${row.dictLabel}"吗？此操作不可恢复！`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
       .then(() => {
-        delDict(row.id as number).then((res) => {
+        delDictValue(row.id as number).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
             refreshData()
@@ -232,17 +213,5 @@
       .catch(() => {
         ElMessage.info('已取消删除')
       })
-  }
-
-  /**
-   * 编辑字典值
-   */
-  const handleDictValue = (row: DictRowItem) => {
-    router.push({
-      path: '/system/dictValue',
-      query: {
-        dictId: row.id
-      }
-    })
   }
 </script>

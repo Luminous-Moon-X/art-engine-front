@@ -11,6 +11,11 @@ export interface DictRowItem {
 }
 
 /**
+ * 显示样式
+ */
+type showStyle = 'primary' | 'info' | 'success' | 'warning' | 'danger'
+
+/**
  * 字典值项
  */
 export interface DictValueRowItem {
@@ -18,7 +23,7 @@ export interface DictValueRowItem {
   dictId: number
   dictLabel: string
   dictValue: string
-  showStyle: string
+  showStyle: showStyle
   orderNum: number
 }
 
