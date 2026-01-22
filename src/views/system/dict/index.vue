@@ -112,7 +112,7 @@
         {
           prop: 'dictCode',
           label: '字典编码',
-          width: 160
+          width: 250
         },
         {
           prop: 'dictName',
@@ -156,7 +156,7 @@
         {
           prop: 'createTime',
           label: '创建时间',
-          width: 200
+          width: 250
         },
         {
           prop: 'remark',

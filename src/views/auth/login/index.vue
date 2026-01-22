@@ -18,7 +18,7 @@
             @keyup.enter="handleSubmit"
             style="margin-top: 25px"
           >
-            <ElFormItem prop="account">
+            <ElFormItem prop="account" v-if="false">
               <ElSelect v-model="formData.tenant" :placeholder="$t('login.placeholder.tenant')">
                 <ElOption
                   v-for="account in accounts"
