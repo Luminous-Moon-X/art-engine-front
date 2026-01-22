@@ -75,7 +75,7 @@ export function delDictValue(id: number) {
  * 根据字典编码获取字典项
  */
 export function fetchGetDictItemList(dictCode: string) {
-  return request.post<DictItem[]>({
-    url: `/api/dictValue/list/${dictCode}`
+  return request.get<DictItem[]>({
+    url: `/api/dictValue/dictByCode/${dictCode}`
   })
 }
