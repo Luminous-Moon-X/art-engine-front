@@ -28,6 +28,16 @@ export interface DictValueRowItem {
 }
 
 /**
+ * 业务使用的字典类型
+ */
+export interface DictItem {
+  dictLabel: string
+  dictValue: string
+  showStyle: showStyle
+  orderNum: number
+}
+
+/**
  * 字典搜索参数
  */
 export type DictSearchParams = Partial<

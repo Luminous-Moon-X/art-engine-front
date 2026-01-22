@@ -3,7 +3,8 @@ import {
   DictRowItem,
   DictValueRowItem,
   DictSearchParams,
-  DictValueSearchParams
+  DictValueSearchParams,
+  DictItem
 } from '@/types/dict'
 
 // 获取字典列表
@@ -67,5 +68,14 @@ export function delDictValue(id: number) {
   return request.del<boolean>({
     url: '/api/dictValue/delete',
     data: { ids: [id] }
+  })
+}
+
+/**
+ * 根据字典编码获取字典项
+ */
+export function fetchGetDictItemList(dictCode: string) {
+  return request.post<DictItem[]>({
+    url: `/api/dictValue/list/${dictCode}`
   })
 }
