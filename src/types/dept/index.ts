@@ -2,7 +2,7 @@
  * 部门Row类型
  */
 export interface DeptRowItem {
-  id: number | null
+  id?: number
   deptName: string
   parentId: number | null
   orderNum: number
@@ -11,6 +11,12 @@ export interface DeptRowItem {
   chargePersonTel: string
   chargePersonEmail: string
   children: DeptRowItem[]
+}
+
+export interface DeptOptionItem {
+  value: number
+  label: string
+  children?: DeptOptionItem[]
 }
 
 /**

@@ -1,11 +1,18 @@
 import request from '@/utils/http'
-import { type DeptRowItem, type DeptSearchParams } from '@/types/dept'
+import { type DeptRowItem, type DeptSearchParams, type DeptOptionItem } from '@/types/dept'
 
 // 获取部门列表
 export function fetchGetDeptList(params: DeptSearchParams) {
   return request.post<DeptRowItem[]>({
     url: '/api/dept/page',
     params: params
+  })
+}
+
+// 获取所有部门
+export function fetchGetAllDept() {
+  return request.get<DeptOptionItem[]>({
+    url: '/api/dept/treeSelect'
   })
 }
 
