@@ -114,6 +114,7 @@
   import { fetchLogin } from '@/api/auth'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
   import { useSettingStore } from '@/store/modules/setting'
+  import CryptoJS from 'crypto-js'
 
   defineOptions({ name: 'Login' })
 
@@ -207,9 +208,12 @@
       // 登录请求
       const { username, password } = formData
 
+      // md5 加密
+      const md5Password = CryptoJS.MD5(password).toString()
+
       const { token } = await fetchLogin({
         userName: username,
-        password
+        password: md5Password
       })
 
       // 验证token

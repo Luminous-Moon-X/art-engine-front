@@ -16,6 +16,13 @@ export function fetchGetAllDept() {
   })
 }
 
+// 获取所有部门（不包含根部门）
+export function getDeptTreeNoTop() {
+  return request.get<DeptOptionItem[]>({
+    url: '/api/dept/treeSelectNoTop'
+  })
+}
+
 // 新增部门
 export function addDept(params: DeptRowItem) {
   return request.post<boolean>({

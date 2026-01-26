@@ -2,7 +2,7 @@
  * 用户行数据类型
  */
 export interface UserRowItem {
-  id: number
+  id?: number
   enableFlag: boolean
   userName: string
   nickName: string
@@ -15,6 +15,8 @@ export interface UserRowItem {
   userAddress: string
   userDescription: string
   userTag: string
+  roleIds: number[]
+  createTime?: Date | string
 }
 
 /**

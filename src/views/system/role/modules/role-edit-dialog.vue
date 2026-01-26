@@ -89,7 +89,7 @@
    * 表单数据
    */
   const form = reactive<RoleListItem>({
-    id: null,
+    id: undefined,
     roleName: '',
     roleCode: '',
     roleDescription: '',

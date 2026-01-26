@@ -8,6 +8,13 @@ export function fetchGetRoleList(params: Api.SystemManage.RoleSearchParams) {
   })
 }
 
+// 获取角色下拉选项
+export function fetchGetRoleSelect() {
+  return request.get<Api.SystemManage.RoleOptionItem[]>({
+    url: '/api/role/select'
+  })
+}
+
 // 新增角色
 export function addRole(params: Api.SystemManage.RoleListItem) {
   return request.post<boolean>({
