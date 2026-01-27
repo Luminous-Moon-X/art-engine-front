@@ -11,7 +11,11 @@
       <ElRow>
         <ElCol :span="12">
           <ElFormItem label="用户名" prop="userName">
-            <ElInput v-model="form.userName" placeholder="请输入用户名" />
+            <ElInput
+              v-model="form.userName"
+              :disabled="dialogType === 'edit'"
+              placeholder="请输入用户名"
+            />
           </ElFormItem>
         </ElCol>
         <ElCol :span="12">
