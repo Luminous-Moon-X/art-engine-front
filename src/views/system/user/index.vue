@@ -1,56 +1,80 @@
 <!-- 用户管理页面 -->
 <template>
   <div class="art-full-height">
-    <!-- 搜索区域 -->
-    <ArtSearchBar
-      ref="searchBarRef"
-      v-model="searchFormState"
-      :items="searchItems"
-      :show-reset-button="true"
-      :show-search-button="true"
-      v-show="showSearchBar"
-      @search="handleSearch"
-      @reset="handleReset"
-    />
+    <div class="box-border flex gap-4 h-full max-md:block max-md:gap-0 max-md:h-auto">
+      <div class="flex-shrink-0 w-70 h-full max-md:w-full max-md:h-auto max-md:mb-5">
+        <ElCard class="tree-card art-card-xs flex flex-col h-full mt-0" shadow="never">
+          <template #header>
+            <b>所属部门</b>
+          </template>
+          <ElScrollbar>
+            <ElTree
+              ref="treeRef"
+              :data="treeData"
+              :props="treeProps"
+              node-key="value"
+              default-expand-all
+              highlight-current
+              :expand-on-click-node="false"
+              @node-click="handleNodeClick"
+            />
+          </ElScrollbar>
+        </ElCard>
+      </div>
+      <div class="flex flex-col flex-grow min-w-0">
+        <!-- 搜索区域 -->
+        <ArtSearchBar
+          ref="searchBarRef"
+          v-model="searchFormState"
+          :items="searchItems"
+          :show-reset-button="true"
+          :show-search-button="true"
+          v-show="showSearchBar"
+          @search="handleSearch"
+          @reset="handleReset"
+        />
 
-    <ElCard
-      class="art-table-card"
-      shadow="never"
-      :style="{ 'margin-top': showSearchBar ? '12px' : '0' }"
-    >
-      <ArtTableHeader
-        v-model:columns="columnChecks"
-        v-model:showSearchBar="showSearchBar"
-        :loading="loading"
-        @refresh="refreshData"
-      >
-        <template #left>
-          <ElSpace wrap>
-            <ElButton type="primary" @click="handleAdd()" v-ripple>新增用户</ElButton>
-          </ElSpace>
-        </template>
-      </ArtTableHeader>
+        <ElCard
+          class="art-table-card"
+          shadow="never"
+          :style="{ 'margin-top': showSearchBar ? '12px' : '0' }"
+        >
+          <ArtTableHeader
+            v-model:columns="columnChecks"
+            v-model:showSearchBar="showSearchBar"
+            :loading="loading"
+            @refresh="refreshData"
+          >
+            <template #left>
+              <ElSpace wrap>
+                <ElButton type="primary" @click="handleAdd()" v-ripple>新增用户</ElButton>
+              </ElSpace>
+            </template>
+          </ArtTableHeader>
 
-      <!-- 表格 -->
-      <ArtTable
-        :loading="loading"
-        :data="data"
-        :columns="columns"
-        :pagination="pagination"
-        rowKey="id"
-        @pagination:size-change="handleSizeChange"
-        @pagination:current-change="handleCurrentChange"
-      >
-      </ArtTable>
-    </ElCard>
+          <!-- 表格 -->
+          <ArtTable
+            :loading="loading"
+            :data="data"
+            :columns="columns"
+            :pagination="pagination"
+            rowKey="id"
+            @pagination:size-change="handleSizeChange"
+            @pagination:current-change="handleCurrentChange"
+          >
+          </ArtTable>
+        </ElCard>
 
-    <!-- 用户编辑弹窗 -->
-    <UserEditDialog
-      v-model="dialogVisible"
-      :dialog-type="dialogType"
-      :user-data="currentUserData"
-      @success="refreshData"
-    />
+        <!-- 用户编辑弹窗 -->
+        <UserEditDialog
+          v-model="dialogVisible"
+          :dialog-type="dialogType"
+          :user-data="currentUserData"
+          :dept-id="currentNodeKey"
+          @success="refreshData"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -61,14 +85,22 @@
   import UserEditDialog from './modules/user-edit-dialog.vue'
   import { ElTag, ElMessageBox } from 'element-plus'
   import { UserRowItem } from '@/types/user'
+  import { getDeptTreeNoTop } from '@/api/dept'
+  import { DeptOptionItem } from '@/types/dept'
 
   defineOptions({ name: 'User' })
 
   // --- 搜索相关 ---
   const showSearchBar = ref(false)
-  const searchFormState = ref({
-    deptName: '',
-    chargePerson: ''
+  interface SearchFormState {
+    userName: string
+    nickName: string
+    deptId?: number
+  }
+  const searchFormState = ref<SearchFormState>({
+    userName: '',
+    nickName: '',
+    deptId: undefined
   })
 
   const searchItems = computed(() => [
@@ -83,6 +115,12 @@
       label: '用户名称',
       type: 'input',
       props: { placeholder: '请输入用户名称' }
+    },
+    {
+      key: 'deptId',
+      label: '部门',
+      type: 'input',
+      hidden: true
     }
   ])
 
@@ -121,17 +159,17 @@
         {
           prop: 'nickName',
           label: '用户名称',
-          minWidth: 200
+          minWidth: 160
         },
         {
           prop: 'userName',
           label: '用户名',
-          width: 200
+          width: 160
         },
         {
           prop: 'userGender',
           label: '用户性别',
-          width: 180,
+          width: 150,
           formatter: (row: UserRowItem) => {
             return row.userGender === '0' ? '女' : '男'
           }
@@ -139,22 +177,22 @@
         {
           prop: 'userPhone',
           label: '手机号',
-          width: 200
+          width: 160
         },
         {
           prop: 'userEmail',
           label: '邮箱',
-          width: 260
+          width: 190
         },
         {
           prop: 'createTime',
           label: '创建时间',
-          width: 260
+          width: 175
         },
         {
           prop: 'enableFlag',
           label: '是否启用',
-          width: 150,
+          width: 130,
           formatter: (row: UserRowItem) => {
             const statusConfig = row.enableFlag
               ? { type: 'success', text: '启用' }
@@ -210,6 +248,7 @@
   // 重置查询条件
   const handleReset = () => {
     resetSearchParams()
+    resetTreeSelected()
   }
 
   // 新增用户
@@ -241,4 +280,30 @@
         ElMessage.info('已取消删除')
       })
   }
+
+  // 左侧树相关
+  const treeRef = ref()
+  const currentNodeKey = ref<number>()
+  const treeProps = {
+    children: 'children',
+    label: 'label'
+  }
+  // 树节点点击事件
+  const handleNodeClick = (data: DeptOptionItem) => {
+    searchFormState.value.deptId = data.value
+    currentNodeKey.value = data.value
+    handleSearch()
+  }
+  // 部门树数据
+  const treeData = ref<DeptOptionItem[]>([])
+  const resetTreeSelected = () => {
+    treeRef.value?.setCurrentKey(null)
+  }
+
+  // 部门树数据获取
+  onBeforeMount(async () => {
+    await getDeptTreeNoTop().then((res) => {
+      treeData.value = res || []
+    })
+  })
 </script>

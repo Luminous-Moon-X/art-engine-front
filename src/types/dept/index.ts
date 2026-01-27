@@ -14,7 +14,7 @@ export interface DeptRowItem {
 }
 
 export interface DeptOptionItem {
-  value: number
+  value?: number
   label: string
   children?: DeptOptionItem[]
 }

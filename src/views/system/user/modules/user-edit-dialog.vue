@@ -101,6 +101,7 @@
     modelValue: boolean
     dialogType: 'add' | 'edit'
     userData?: UserRowItem
+    deptId?: number
   }
 
   interface Emits {
@@ -111,7 +112,8 @@
   const props = withDefaults(defineProps<Props>(), {
     modelValue: false,
     dialogType: 'add',
-    userData: undefined
+    userData: undefined,
+    deptId: undefined
   })
 
   const emit = defineEmits<Emits>()
@@ -184,9 +186,12 @@
     async (newVal) => {
       if (newVal) {
         initForm()
-        await getDeptTreeNoTop().then((res) => (allDeptList.value = res))
-        await fetchGetRoleSelect().then((res) => (roleList.value = res))
-        await getDict('system_gender').then((res) => {
+        if (props.deptId && props.dialogType === 'add') {
+          form.deptId = props.deptId
+        }
+        getDeptTreeNoTop().then((res) => (allDeptList.value = res))
+        fetchGetRoleSelect().then((res) => (roleList.value = res))
+        getDict('system_gender').then((res) => {
           genderOptions.value = res
           form.userGender = genderOptions.value[0].dictValue
         })
