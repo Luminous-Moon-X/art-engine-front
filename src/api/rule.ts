@@ -1,5 +1,5 @@
 import request from '@/utils/http'
-import { RuleRowItem, RuleSearchParams } from '@/types/rule'
+import { RuleRowItem, RuleSearchParams, RuleItem } from '@/types/rule'
 
 /**
  * 获取规则列表
@@ -8,6 +8,15 @@ export function fetchRuleList(params: RuleSearchParams) {
   return request.post<RuleRowItem[]>({
     url: '/api/rule/page',
     params: params
+  })
+}
+
+/**
+ * 获取规则详情
+ */
+export function getRuleByCode(code: string) {
+  return request.get<RuleItem>({
+    url: '/api/rule/code/' + code
   })
 }
 

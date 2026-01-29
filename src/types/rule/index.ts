@@ -13,6 +13,18 @@ export interface RuleRowItem {
 }
 
 /**
+ * 规则详情项
+ */
+export interface RuleItem {
+  id?: number
+  ruleName: string
+  ruleCode: string
+  ruleValue: string
+  ruleValueType: string
+  remark?: string
+}
+
+/**
  * 规则搜索参数
  */
 export type RuleSearchParams = Partial<
