@@ -1,17 +1,18 @@
-<img  src="https://www.qiniu.lingchen.kim/github-cover-light6.webp" />
+<img  src="./src/assets/images/common/logo-title.png" />
 
 <br />
-<h1 align="center">Art Engine</h1>
-<p align="center">一款兼具设计美学与高效开发的后台系统模版，助你快速构建专业级应用</p>
-<div align="center">简体中文 | <a href="./README.md">English</a></div>
+<p align="left">一款兼具设计美学与高效开发的后台管理系统，助你快速构建专业级应用</p>
 
-<br />
-<div align="center">
-
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE) [![github stars](https://img.shields.io/github/stars/Daymychen/art-design-pro)](https://github.com/Daymychen/art-design-pro/stargazers) [![github forks](https://img.shields.io/github/forks/Daymychen/art-design-pro)](https://github.com/Daymychen/art-design-pro/network/members)
-
+<div align="left">
+<p>
+  <a href="https://gitee.com/hiroshi-xh/art-engine/stargazers">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/star.svg?theme=dark" alt="star"/>
+  </a>
+  <a href="https://gitee.com/hiroshi-xh/art-engine/members">
+    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/fork.svg?theme=dark" alt="fork"/>
+  </a>
+</p>
 </div>
-<br />
 
 ## 这个项目有什么特别的呢？
 
@@ -25,8 +26,6 @@
 
 **高效开发**：内置 useTable、ArtForm 等实用 API，显著提升开发效率
 
-**精简脚本**：内置一键清理脚本，可快速清理演示数据，立即得到可开发的基础项目
-
 ## 技术栈
 
 开发框架：Vue3、TypeScript、Vite、Element-Plus、Tailwind CSS
@@ -35,17 +34,9 @@
 
 ## 预览
 
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c1.webp" alt="浅色主题"/></kbd>
+<kbd><img src="./src/assets/images/common/light.png" alt="浅色主题"/></kbd>
 
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c2.webp" alt="浅色主题"/></kbd>
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c4.webp" alt="暗黑主题"/></kbd>
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c5.webp" alt="暗黑主题"/></kbd>
-
-## 快速访问
-
-[演示地址](https://www.artd.pro) | [官方文档](https://www.artd.pro/docs) | [更新日志](./CHANGELOG.md)
+<kbd><img src="./src/assets/images/common/dark.png" alt="暗黑主题"/></kbd>
 
 ## 安装运行
 
@@ -62,18 +53,6 @@ pnpm dev
 # 生产环境打包
 pnpm build
 ```
-
-## 精简版本
-
-项目内置精简脚本，可快速移除项目中的演示数据，让开发者获得一个可快速开发的基础项目
-
-```bash
-pnpm clean:dev
-```
-
-## 技术支持
-
-QQ群：<a href="https://qm.qq.com/cgi-bin/qm/qr?k=Gg6yzZLFaNgmRhK0T5Qcjf7-XcAFWWXm&jump_from=webapi&authKey=YpRKVJQyFKYbGTiKw0GJ/YQXnNF+GdXNZC5beQQqnGZTvuLlXoMO7nw5fNXvmVhA">1038930070</a>（点击链接加入群聊）
 
 ## 兼容性
 
@@ -92,13 +71,3 @@ QQ群：<a href="https://qm.qq.com/cgi-bin/qm/qr?k=Gg6yzZLFaNgmRhK0T5Qcjf7-XcAFW
 ## 持续优化与扩展
 
 项目保持活跃更新，支持最新前端技术栈，兼容主流框架，确保长期稳定性和扩展性。社区驱动的反馈机制，让你的需求快速融入项目迭代。
-
-## 捐赠
-
-如果你觉得这个项目为你减少了开发成本、化解了工作 / 生活里的难题，可以通过以下方式支持一下～
-
-<img src="https://www.qiniu.lingchen.kim/%E7%BB%84%202%402x%202.png" alt="捐赠二维码"/>
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Daymychen/art-design-pro&type=Date)](https://www.star-history.com/#Daymychen/art-design-pro&Date)
