@@ -1,11 +1,25 @@
 import request from '@/utils/http'
-import { type UserRowItem, type UserSearchParams } from '@/types/user'
+import { type UserRowItem, type UserSearchParams, type DeptUserTreeItem } from '@/types/user'
 
 // 获取用户列表
 export function fetchGetUserList(params: UserSearchParams) {
   return request.post<UserRowItem[]>({
     url: '/api/user/page',
     params: params
+  })
+}
+
+// 获取部门用户树
+export function deptUserTree() {
+  return request.get<DeptUserTreeItem[]>({
+    url: '/api/user/deptUserTree'
+  })
+}
+
+// 获取用户树
+export function userTree() {
+  return request.get<DeptUserTreeItem[]>({
+    url: '/api/user/userTree'
   })
 }
 

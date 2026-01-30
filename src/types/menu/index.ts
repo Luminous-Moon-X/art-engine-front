@@ -42,6 +42,15 @@ export interface MenuRowItem {
   children: MenuRowItem[]
 }
 
+/**
+ * 菜单选项项类型
+ */
+export interface MenuTreeItem {
+  value?: number
+  label: string
+  children?: MenuTreeItem[]
+}
+
 export type MenuSearchParams = Partial<
   Pick<
     MenuRowItem,

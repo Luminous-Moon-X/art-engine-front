@@ -1,11 +1,18 @@
 import request from '@/utils/http'
-import { type MenuRowItem, type MenuSearchParams } from '@/types/menu'
+import { type MenuRowItem, type MenuSearchParams, type MenuTreeItem } from '@/types/menu'
 
 // 获取菜单列表
 export function fetchGetMenuList(params: MenuSearchParams) {
   return request.post<MenuRowItem[]>({
     url: '/api/menu/page',
     params: params
+  })
+}
+
+// 获取所有菜单树
+export function getAllMenuTree() {
+  return request.get<MenuTreeItem[]>({
+    url: '/api/menu/allMenuTree'
   })
 }
 

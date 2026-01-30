@@ -20,6 +20,16 @@ export interface UserRowItem {
 }
 
 /**
+ * 部门用户树项类型
+ */
+export interface DeptUserTreeItem {
+  label: string
+  value: number
+  children?: DeptUserTreeItem[]
+  disabled: boolean
+}
+
+/**
  * 用户查询参数类型
  */
 export type UserSearchParams = Partial<
