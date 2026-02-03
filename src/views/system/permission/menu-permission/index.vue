@@ -16,6 +16,7 @@
                   highlight-current
                   :expand-on-click-node="false"
                   @node-click="handleRoleNodeClick"
+                  v-if="roleTreeVisible"
                 />
               </ElScrollbar>
             </ElTab-pane>
@@ -28,6 +29,7 @@
                 highlight-current
                 :expand-on-click-node="false"
                 @node-click="handleDeptNodeClick"
+                v-if="deptTreeVisible"
               />
             </ElTab-pane>
             <ElTab-pane label="用户" name="user">
@@ -39,13 +41,18 @@
                 highlight-current
                 :expand-on-click-node="false"
                 @node-click="handleUserNodeClick"
+                v-if="userTreeVisible"
               />
             </ElTab-pane>
           </ElTabs>
         </ElCard>
       </div>
       <div class="flex flex-col flex-grow min-w-0">
-        <ElCard class="tree-card art-card-xs flex flex-col h-full mt-0" shadow="never">
+        <ElCard
+          class="tree-card art-card-xs flex flex-col h-full mt-0"
+          shadow="never"
+          v-loading="menuTreeLoading"
+        >
           <template #header>
             <div class="flex items-center justify-between">
               <b>功能授权</b>
@@ -61,6 +68,7 @@
               highlight-current
               show-checkbox
               :expand-on-click-node="false"
+              v-if="menuTreeVisible"
             />
           </ElScrollbar>
         </ElCard>
@@ -78,6 +86,7 @@
   import { getAllMenuTree } from '@/api/menu'
   import { DeptUserTreeItem } from '@/types/user'
   import { userTree } from '@/api/user'
+  import { getMenuPermission, setPermission } from '@/api/permission'
 
   defineOptions({ name: 'MenuPermission' })
 
@@ -87,28 +96,74 @@
     label: 'label'
   }
 
+  // 监听 activeTab 变化，重置当前节点键和菜单树可见性
+  watch(activeTab, (newValue) => {
+    currentNodeKey.value = undefined
+    menuTreeVisible.value = false
+    // 重置授权主体树选择状态
+    if (newValue === 'role') {
+      roleTreeVisible.value = true
+      deptTreeVisible.value = false
+      userTreeVisible.value = false
+    } else if (newValue === 'dept') {
+      deptTreeVisible.value = true
+      roleTreeVisible.value = false
+      userTreeVisible.value = false
+    } else if (newValue === 'user') {
+      userTreeVisible.value = true
+      roleTreeVisible.value = false
+      deptTreeVisible.value = false
+    }
+  })
+
+  // 当前选中节点键
+  const currentNodeKey = ref<number>()
+
   // 角色树相关
   const roleTreeRef = ref()
+  const roleTreeVisible = ref(true)
   const roleTreeData = ref<Api.SystemManage.RoleOptionItem[]>([])
   const handleRoleNodeClick = (node: Api.SystemManage.RoleOptionItem) => {
-    console.log(node)
+    showMenuPermission('role', node.value)
   }
 
   // 部门树相关
   const deptTreeRef = ref()
+  const deptTreeVisible = ref(false)
   const deptTreeData = ref<DeptOptionItem[]>([])
   const handleDeptNodeClick = (node: DeptOptionItem) => {
-    console.log(node)
+    showMenuPermission('dept', node.value)
   }
 
   // 用户树相关
   const userTreeRef = ref()
+  const userTreeVisible = ref(false)
   const userTreeData = ref<DeptUserTreeItem[]>([])
   const handleUserNodeClick = (node: DeptUserTreeItem) => {
-    console.log(node)
+    showMenuPermission('user', node.value)
+  }
+
+  // 显示菜单权限
+  const showMenuPermission = (type: string, id: number) => {
+    currentNodeKey.value = id
+    menuTreeVisible.value = true
+    menuTreeLoading.value = true
+
+    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 500))
+    const request = getMenuPermission(type, id)
+
+    Promise.all([request, minLoadingTime])
+      .then(([res]) => {
+        menuTreeRef.value.setCheckedKeys(res || [])
+      })
+      .finally(() => {
+        menuTreeLoading.value = false
+      })
   }
 
   // 功能树相关
+  const menuTreeVisible = ref(false)
+  const menuTreeLoading = ref(false)
   const menuTreeRef = ref()
   const menuTreeData = ref<MenuTreeItem[]>([])
 
@@ -135,7 +190,19 @@
     })
   })
 
+  // 保存授权
   const handleSave = () => {
-    console.log('保存功能授权')
+    if (!currentNodeKey.value) {
+      ElMessage.warning('请选择一个授权主体！')
+      return
+    }
+    const checkedKeys = menuTreeRef.value.getCheckedKeys()
+    setPermission(activeTab.value, currentNodeKey.value, checkedKeys).then((res) => {
+      if (res) {
+        ElMessage.success('授权成功！')
+      } else {
+        ElMessage.error('授权失败！')
+      }
+    })
   }
 </script>
