@@ -7,6 +7,7 @@
     ]"
     :style="{ backgroundColor: buttonBgColor, color: iconColor }"
     @click="handleClick"
+    v-auth="auth"
   >
     <ArtSvgIcon :icon="iconContent" />
   </div>
@@ -26,6 +27,8 @@
     iconColor?: string
     /** 按钮背景色 */
     buttonBgColor?: string
+    /** 按钮权限 */
+    auth?: string
   }
 
   const props = withDefaults(defineProps<Props>(), {})

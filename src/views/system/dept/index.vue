@@ -26,7 +26,9 @@
       >
         <template #left>
           <ElSpace wrap>
-            <ElButton type="primary" @click="handleAdd()" v-ripple>新增部门</ElButton>
+            <ElButton type="primary" @click="handleAdd()" v-ripple v-auth="'system:dept:add'"
+              >新增部门</ElButton
+            >
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -166,15 +168,18 @@
             h('div', { style: 'text-align: right' }, [
               h(ArtButtonTable, {
                 type: 'add',
-                onClick: () => handleAdd(row)
+                onClick: () => handleAdd(row),
+                auth: 'system:dept:add'
               }),
               h(ArtButtonTable, {
                 type: 'edit',
-                onClick: () => handleEdit(row)
+                onClick: () => handleEdit(row),
+                auth: 'system:dept:edit'
               }),
               h(ArtButtonTable, {
                 type: 'delete',
-                onClick: () => handleDelete(row)
+                onClick: () => handleDelete(row),
+                auth: 'system:dept:delete'
               })
             ])
         }
