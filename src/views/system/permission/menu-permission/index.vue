@@ -181,7 +181,12 @@
 
     // 初始化用户树
     userTree().then((res) => {
-      userTreeData.value = res || []
+      const userList = res || []
+      const index = userList.findIndex((item: any) => item.label === '超级管理员')
+      if (index !== -1) {
+        userList.splice(index, 1)
+      }
+      userTreeData.value = userList
     })
 
     // 初始化功能树
