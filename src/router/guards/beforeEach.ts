@@ -271,6 +271,19 @@ async function handleDynamicRoutes(
       throw new Error('获取菜单列表失败，请重新登录')
     }
 
+    // 添加个人中心路由
+    menuList.push({
+      path: '/system/user/user-center',
+      name: 'UserCenter',
+      component: '/system/user-center',
+      meta: {
+        title: '个人中心',
+        icon: 'icon-user',
+        permissionSign: 'userCenter:list',
+        isHide: true
+      }
+    })
+
     // 4. 注册动态路由
     routeRegistry?.register(menuList)
 
