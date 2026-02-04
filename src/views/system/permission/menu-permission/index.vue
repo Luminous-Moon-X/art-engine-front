@@ -186,7 +186,12 @@
 
     // 初始化功能树
     getAllMenuTree().then((res) => {
-      menuTreeData.value = res || []
+      const menuList = res || []
+      const index = menuList.findIndex((item: any) => item.label === '首页')
+      if (index !== -1) {
+        menuList.splice(index, 1)
+      }
+      menuTreeData.value = menuList
     })
   })
 
