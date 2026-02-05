@@ -43,6 +43,11 @@ function checkAuthPermission(el: HTMLElement, binding: AuthBinding): void {
   // 获取当前路由的权限列表
   const authList = (router.currentRoute.value.meta.authList as Array<{ authMark: string }>) || []
 
+  // 如果传入的权限标识为空，直接返回
+  if (!binding.value) {
+    return
+  }
+
   // 检查是否有对应的权限标识
   const hasPermission = authList.some((item) => item.authMark === binding.value)
 
