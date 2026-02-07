@@ -34,6 +34,7 @@
 
 import { router } from '@/router'
 import { App, Directive, DirectiveBinding } from 'vue'
+import { useUserStore } from '@/store/modules/user'
 
 interface AuthBinding extends DirectiveBinding {
   value: string
@@ -43,8 +44,10 @@ function checkAuthPermission(el: HTMLElement, binding: AuthBinding): void {
   // 获取当前路由的权限列表
   const authList = (router.currentRoute.value.meta.authList as Array<{ authMark: string }>) || []
 
-  // 如果传入的权限标识为空，直接返回
-  if (!binding.value) {
+  const userStore = useUserStore()
+
+  // 如果传入的权限标识为空或者是管理员，直接返回
+  if (!binding.value || userStore.getUserInfo.userType === 'admin') {
     return
   }
 
