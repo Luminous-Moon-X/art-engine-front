@@ -172,13 +172,43 @@ export const useUserStore = defineStore(
         useMenuStore().setHomePath('')
         // 重置路由状态
         resetRouterState(500)
-        // 跳转到登录页，携带当前路由作为 redirect 参数
-        const currentRoute = router.currentRoute.value
-        const redirect = currentRoute.path !== '/login' ? currentRoute.fullPath : undefined
         router.push({
-          name: 'Login',
-          query: redirect ? { redirect } : undefined
+          name: 'Login'
         })
+      })
+    }
+
+    /**
+     * 前端退出登录(用于token过期后的处理)
+     * 清空所有用户相关状态并跳转到登录页
+     */
+    const logoutFront = () => {
+      // 清空用户信息
+      info.value = {}
+      // 重置登录状态
+      isLogin.value = false
+      // 重置锁屏状态
+      isLock.value = false
+      // 清空锁屏密码
+      lockPassword.value = ''
+      // 清空访问令牌
+      accessToken.value = ''
+      // 清空刷新令牌
+      refreshToken.value = ''
+      // 清空工作台标签页
+      useWorktabStore().clearAll()
+      // 移除iframe路由缓存
+      sessionStorage.removeItem('iframeRoutes')
+      // 清空主页路径
+      useMenuStore().setHomePath('')
+      // 重置路由状态
+      resetRouterState(500)
+      // 跳转到登录页，携带当前路由作为 redirect 参数
+      const currentRoute = router.currentRoute.value
+      const redirect = currentRoute.path !== '/login' ? currentRoute.fullPath : undefined
+      router.push({
+        name: 'Login',
+        query: redirect ? { redirect } : undefined
       })
     }
 
@@ -201,7 +231,8 @@ export const useUserStore = defineStore(
       setLockStatus,
       setLockPassword,
       setToken,
-      logOut
+      logOut,
+      logoutFront
     }
   },
   {
