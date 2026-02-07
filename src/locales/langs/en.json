@@ -160,6 +160,10 @@
     "success": {
       "title": "Login successful",
       "message": "Welcome back"
+    },
+    "logoutSuccess": {
+      "title": "Logout successful",
+      "message": "You have successfully logged out"
     }
   },
   "forgetPassword": {

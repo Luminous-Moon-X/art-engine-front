@@ -15,6 +15,17 @@ export function fetchLogin(params: Api.Auth.LoginParams) {
 }
 
 /**
+ * 登出
+ * @param params 登出参数
+ * @returns 登出响应
+ */
+export function fetchLogout() {
+  return request.post({
+    url: '/api/auth/logout'
+  })
+}
+
+/**
  * 获取用户信息
  * @returns 用户信息
  */
