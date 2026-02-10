@@ -26,6 +26,18 @@ export function fetchLogout() {
 }
 
 /**
+ * 修改密码
+ * @param params 修改密码参数
+ * @returns 修改密码响应
+ */
+export function userResetPassword(params: Api.Auth.UserResetPasswordParams) {
+  return request.put({
+    url: '/api/auth/userResetPassword',
+    data: params
+  })
+}
+
+/**
  * 获取用户信息
  * @returns 用户信息
  */

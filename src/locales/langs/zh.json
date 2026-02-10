@@ -26,8 +26,10 @@
       "logout": "退出登录",
       "resetPassword": "修改密码",
       "requiredOriginPwd": "请输入原密码",
+      "newPasswordSameAsOld": "新密码不能与原密码相同",
       "requiredNewPwd": "请输入新密码",
-      "confirmNewPwd": "请确认新密码"
+      "confirmNewPwd": "请确认新密码",
+      "resetPwdSuccess": "密码修改成功"
     },
     "guide": {
       "title": "点击这里查看",

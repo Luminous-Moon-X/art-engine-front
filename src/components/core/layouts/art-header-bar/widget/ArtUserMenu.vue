@@ -121,6 +121,8 @@
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
   import { reactive, ref } from 'vue'
+  import CryptoJS from 'crypto-js'
+  import { userResetPassword } from '@/api/auth'
 
   defineOptions({ name: 'ArtUserMenu' })
 
@@ -140,6 +142,12 @@
     confirmPassword: ''
   })
 
+  /**
+   * 确认密码校验
+   * @param rule 校验规则
+   * @param value 输入值
+   * @param callback 回调函数
+   */
   const validateConfirmPassword = (rule: any, value: string, callback: any) => {
     if (!value) {
       callback()
@@ -150,9 +158,29 @@
     }
   }
 
+  /**
+   * 新密码校验
+   * @param rule 校验规则
+   * @param value 输入值
+   * @param callback 回调函数
+   */
+  const validateNewPassword = (rule: any, value: string, callback: any) => {
+    if (value === passwordForm.oldPassword) {
+      callback(new Error(t('topBar.user.newPasswordSameAsOld')))
+    } else {
+      callback()
+    }
+  }
+
+  /**
+   * 密码校验规则
+   */
   const passwordRules = reactive<FormRules>({
     oldPassword: [{ required: true, message: t('topBar.user.requiredOriginPwd'), trigger: 'blur' }],
-    newPassword: [{ required: true, message: t('topBar.user.requiredNewPwd'), trigger: 'blur' }],
+    newPassword: [
+      { required: true, message: t('topBar.user.requiredNewPwd'), trigger: 'blur' },
+      { validator: validateNewPassword, trigger: 'blur' }
+    ],
     confirmPassword: [
       { validator: validateConfirmPassword, trigger: 'blur' },
       { required: true, message: t('topBar.user.confirmNewPwd'), trigger: 'blur' }
@@ -175,24 +203,35 @@
     passwordDialogVisible.value = true
   }
 
+  /**
+   * 关闭修改密码弹窗
+   */
   const closePasswordDialog = () => {
     passwordDialogVisible.value = false
     passwordFormRef.value?.resetFields()
   }
 
+  /**
+   * 提交修改密码
+   * @param formEl 表单实例
+   */
   const submitPassword = async (formEl: FormInstance | undefined) => {
     if (!formEl) return
-    await formEl.validate((valid, fields) => {
+    await formEl.validate((valid) => {
       if (valid) {
-        // TODO: Call API to update password
-        console.log('submit!', passwordForm)
-        ElMessage({
-          message: t('common.operationSuccess'),
-          type: 'success'
+        // 密码加密
+        passwordForm.oldPassword = CryptoJS.MD5(passwordForm.oldPassword).toString()
+        passwordForm.newPassword = CryptoJS.MD5(passwordForm.newPassword).toString()
+        passwordForm.confirmPassword = CryptoJS.MD5(passwordForm.confirmPassword).toString()
+        userResetPassword(passwordForm).then(() => {
+          ElMessage({
+            message: t('topBar.user.resetPwdSuccess'),
+            type: 'success'
+          })
+          closePasswordDialog()
+          // 修改密码成功，登出当前用户
+          userStore.logOut()
         })
-        closePasswordDialog()
-      } else {
-        console.log('error submit!', fields)
       }
     })
   }

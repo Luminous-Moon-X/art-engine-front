@@ -68,6 +68,13 @@ declare namespace Api {
       password: string
     }
 
+    /** 修改密码参数 */
+    interface UserResetPasswordParams {
+      oldPassword: string
+      newPassword: string
+      confirmPassword: string
+    }
+
     /** 登录响应 */
     interface LoginResponse {
       token: string

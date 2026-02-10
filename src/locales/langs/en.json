@@ -26,8 +26,10 @@
       "logout": "Log out",
       "resetPassword": "Reset password",
       "requiredOriginPwd": "Required original password",
+      "newPasswordSameAsOld": "New password cannot be the same as the original password",
       "requiredNewPwd": "Required new password",
-      "confirmNewPwd": "Confirm new password"
+      "confirmNewPwd": "Confirm new password",
+      "resetPwdSuccess": "Password reset successfully"
     },
     "guide": {
       "title": "Click here to view",
