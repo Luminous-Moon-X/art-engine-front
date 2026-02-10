@@ -37,15 +37,19 @@
             <ArtSvgIcon icon="ri:user-3-line" />
             <span>{{ $t('topBar.user.userCenter') }}</span>
           </li>
-          <li class="btn-item" @click="toDocs()">
+          <li class="btn-item" @click="resetPwd()">
+            <ArtSvgIcon icon="ri:lock-password-line" />
+            <span>{{ $t('topBar.user.resetPassword') }}</span>
+          </li>
+          <li class="btn-item" @click="toDocs()" v-if="false">
             <ArtSvgIcon icon="ri:book-2-line" />
             <span>{{ $t('topBar.user.docs') }}</span>
           </li>
-          <li class="btn-item" @click="toGithub()">
+          <li class="btn-item" @click="toGithub()" v-if="false">
             <ArtSvgIcon icon="ri:github-line" />
             <span>{{ $t('topBar.user.github') }}</span>
           </li>
-          <li class="btn-item" @click="lockScreen()">
+          <li class="btn-item" @click="lockScreen()" v-if="false">
             <ArtSvgIcon icon="ri:lock-line" />
             <span>{{ $t('topBar.user.lockScreen') }}</span>
           </li>
@@ -57,15 +61,66 @@
       </div>
     </template>
   </ElPopover>
+
+  <el-dialog
+    v-model="passwordDialogVisible"
+    :title="$t('topBar.user.resetPassword')"
+    width="500px"
+    @close="closePasswordDialog"
+  >
+    <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
+      <el-form-item label="原密码" prop="oldPassword">
+        <el-input
+          v-model="passwordForm.oldPassword"
+          type="password"
+          show-password
+          :placeholder="$t('login.placeholder.password')"
+        />
+      </el-form-item>
+      <el-form-item label="新密码" prop="newPassword">
+        <el-input
+          v-model="passwordForm.newPassword"
+          type="password"
+          show-password
+          :placeholder="$t('register.placeholder.password')"
+        />
+      </el-form-item>
+      <el-form-item label="确认密码" prop="confirmPassword">
+        <el-input
+          v-model="passwordForm.confirmPassword"
+          type="password"
+          show-password
+          :placeholder="$t('register.placeholder.confirmPassword')"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="closePasswordDialog">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="submitPassword(passwordFormRef)">
+          {{ $t('common.confirm') }}
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n'
   import { useRouter } from 'vue-router'
-  import { ElMessageBox } from 'element-plus'
+  import {
+    ElMessageBox,
+    ElDialog,
+    ElForm,
+    ElFormItem,
+    ElInput,
+    FormInstance,
+    FormRules
+  } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
+  import { reactive, ref } from 'vue'
 
   defineOptions({ name: 'ArtUserMenu' })
 
@@ -76,12 +131,70 @@
   const { getUserInfo: userInfo } = storeToRefs(userStore)
   const userMenuPopover = ref()
 
+  // Password Dialog Logic
+  const passwordDialogVisible = ref(false)
+  const passwordFormRef = ref<FormInstance>()
+  const passwordForm = reactive({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+
+  const validateConfirmPassword = (rule: any, value: string, callback: any) => {
+    if (!value) {
+      callback()
+    } else if (value !== passwordForm.newPassword) {
+      callback(new Error(t('register.rule.passwordMismatch')))
+    } else {
+      callback()
+    }
+  }
+
+  const passwordRules = reactive<FormRules>({
+    oldPassword: [{ required: true, message: t('topBar.user.requiredOriginPwd'), trigger: 'blur' }],
+    newPassword: [{ required: true, message: t('topBar.user.requiredNewPwd'), trigger: 'blur' }],
+    confirmPassword: [
+      { validator: validateConfirmPassword, trigger: 'blur' },
+      { required: true, message: t('topBar.user.confirmNewPwd'), trigger: 'blur' }
+    ]
+  })
+
   /**
    * 页面跳转
    * @param {string} path - 目标路径
    */
   const goPage = (path: string): void => {
     router.push(path)
+  }
+
+  /**
+   * 修改密码
+   */
+  const resetPwd = (): void => {
+    closeUserMenu()
+    passwordDialogVisible.value = true
+  }
+
+  const closePasswordDialog = () => {
+    passwordDialogVisible.value = false
+    passwordFormRef.value?.resetFields()
+  }
+
+  const submitPassword = async (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    await formEl.validate((valid, fields) => {
+      if (valid) {
+        // TODO: Call API to update password
+        console.log('submit!', passwordForm)
+        ElMessage({
+          message: t('common.operationSuccess'),
+          type: 'success'
+        })
+        closePasswordDialog()
+      } else {
+        console.log('error submit!', fields)
+      }
+    })
   }
 
   /**

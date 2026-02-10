@@ -23,7 +23,11 @@
       "docs": "Document",
       "github": "Github",
       "lockScreen": "Lock screen",
-      "logout": "Log out"
+      "logout": "Log out",
+      "resetPassword": "Reset password",
+      "requiredOriginPwd": "Required original password",
+      "requiredNewPwd": "Required new password",
+      "confirmNewPwd": "Confirm new password"
     },
     "guide": {
       "title": "Click here to view",

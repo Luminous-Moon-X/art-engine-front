@@ -23,7 +23,11 @@
       "docs": "使用文档",
       "github": "Github",
       "lockScreen": "锁定屏幕",
-      "logout": "退出登录"
+      "logout": "退出登录",
+      "resetPassword": "修改密码",
+      "requiredOriginPwd": "请输入原密码",
+      "requiredNewPwd": "请输入新密码",
+      "confirmNewPwd": "请确认新密码"
     },
     "guide": {
       "title": "点击这里查看",
