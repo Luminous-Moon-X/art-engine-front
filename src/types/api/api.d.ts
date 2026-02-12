@@ -79,6 +79,7 @@ declare namespace Api {
     interface LoginResponse {
       token: string
       refreshToken: string
+      forceChangePassword: boolean
     }
 
     /** 用户信息 */

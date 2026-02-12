@@ -104,6 +104,49 @@
         </div>
       </div>
     </div>
+
+    <!-- 修改密码弹窗 -->
+    <ElDialog
+      v-model="passwordDialogVisible"
+      :title="$t('topBar.user.resetPassword')"
+      width="400px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      append-to-body
+    >
+      <ElForm
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="100px"
+        label-position="top"
+      >
+        <ElFormItem :label="$t('topBar.user.requiredNewPwd')" prop="newPassword">
+          <ElInput
+            v-model="passwordForm.newPassword"
+            type="password"
+            show-password
+            :placeholder="$t('topBar.user.requiredNewPwd')"
+          />
+        </ElFormItem>
+        <ElFormItem :label="$t('topBar.user.confirmNewPwd')" prop="confirmPassword">
+          <ElInput
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            :placeholder="$t('topBar.user.confirmNewPwd')"
+          />
+        </ElFormItem>
+      </ElForm>
+      <template #footer>
+        <div class="dialog-footer">
+          <ElButton type="primary" @click="handlePasswordSubmit" class="w-full">
+            {{ $t('forgetPassword.submitBtnText') }}
+          </ElButton>
+        </div>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
@@ -211,7 +254,7 @@
       // md5 加密
       const md5Password = CryptoJS.MD5(password).toString()
 
-      const { token } = await fetchLogin({
+      const { token, forceChangePassword } = await fetchLogin({
         userName: username,
         password: md5Password
       })
@@ -219,6 +262,15 @@
       // 验证token
       if (!token) {
         throw new Error('Login failed - no token received')
+      }
+
+      // 强制修改密码
+      if (forceChangePassword) {
+        passwordDialogVisible.value = true
+        // 存储 token，以便后续修改密码接口使用
+        userStore.setToken(token)
+        loading.value = false
+        return
       }
 
       // 存储 token 和登录状态
@@ -249,6 +301,42 @@
   // 重置拖拽验证
   const resetDragVerify = () => {
     dragVerify.value.reset()
+  }
+
+  // 修改密码弹窗
+  const passwordDialogVisible = ref(false)
+  const passwordFormRef = ref<FormInstance>()
+  const passwordForm = reactive({
+    newPassword: '',
+    confirmPassword: ''
+  })
+
+  const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+    if (value === '') {
+      callback(new Error(t('topBar.user.confirmNewPwd')))
+    } else if (value !== passwordForm.newPassword) {
+      callback(new Error(t('register.rule.passwordMismatch')))
+    } else {
+      callback()
+    }
+  }
+
+  const passwordRules = computed<FormRules>(() => ({
+    newPassword: [
+      { required: true, message: t('topBar.user.requiredNewPwd'), trigger: 'blur' },
+      { min: 6, message: t('register.rule.passwordLength'), trigger: 'blur' }
+    ],
+    confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }]
+  }))
+
+  const handlePasswordSubmit = async () => {
+    if (!passwordFormRef.value) return
+    await passwordFormRef.value.validate((valid) => {
+      if (valid) {
+        // TODO: 提交修改密码逻辑
+        console.log('Password change submitted', passwordForm)
+      }
+    })
   }
 
   // 登录成功提示
