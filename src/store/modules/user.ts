@@ -139,6 +139,12 @@ export const useUserStore = defineStore(
     }
 
     /**
+     * 获取访问令牌
+     * @returns 访问令牌
+     */
+    const getToken = () => accessToken.value
+
+    /**
      * 退出登录
      * 清空所有用户相关状态并跳转到登录页
      */
@@ -224,6 +230,7 @@ export const useUserStore = defineStore(
       getUserInfo,
       getSettingState,
       getWorktabState,
+      getToken,
       setUserInfo,
       setLoginStatus,
       setLanguage,

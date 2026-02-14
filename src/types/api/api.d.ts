@@ -75,6 +75,13 @@ declare namespace Api {
       confirmPassword: string
     }
 
+    /** 强制重置密码参数 */
+    interface ForceResetPasswordParams {
+      newPassword: string
+      confirmPassword: string
+      tempToken: string
+    }
+
     /** 登录响应 */
     interface LoginResponse {
       token: string

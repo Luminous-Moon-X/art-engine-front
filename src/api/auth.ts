@@ -38,6 +38,18 @@ export function userResetPassword(params: Api.Auth.UserResetPasswordParams) {
 }
 
 /**
+ * 强制重置密码
+ * @param params 强制重置密码参数
+ * @returns 强制重置密码响应
+ */
+export function forceResetPassword(params: Api.Auth.ForceResetPasswordParams) {
+  return request.put({
+    url: '/api/auth/changePasswordWithTempToken',
+    data: params
+  })
+}
+
+/**
  * 获取用户信息
  * @returns 用户信息
  */

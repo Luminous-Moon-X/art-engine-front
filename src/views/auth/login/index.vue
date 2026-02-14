@@ -154,7 +154,7 @@
   import { useUserStore } from '@/store/modules/user'
   import { useI18n } from 'vue-i18n'
   import { HttpError } from '@/utils/http/error'
-  import { fetchLogin } from '@/api/auth'
+  import { fetchLogin, forceResetPassword } from '@/api/auth'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
   import { useSettingStore } from '@/store/modules/setting'
   import CryptoJS from 'crypto-js'
@@ -333,8 +333,18 @@
     if (!passwordFormRef.value) return
     await passwordFormRef.value.validate((valid) => {
       if (valid) {
-        // TODO: 提交修改密码逻辑
-        console.log('Password change submitted', passwordForm)
+        forceResetPassword({
+          newPassword: CryptoJS.MD5(passwordForm.newPassword).toString(),
+          confirmPassword: CryptoJS.MD5(passwordForm.confirmPassword).toString(),
+          tempToken: userStore.getToken()
+        }).then(() => {
+          // 关闭弹窗
+          passwordDialogVisible.value = false
+          ElMessage({
+            message: t('topBar.user.resetPwdSuccess'),
+            type: 'success'
+          })
+        })
       }
     })
   }
