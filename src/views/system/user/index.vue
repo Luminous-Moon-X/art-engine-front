@@ -80,10 +80,10 @@
 
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetUserList, delUser } from '@/api/user'
-  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { fetchGetUserList, delUser, resetDefaultPassword } from '@/api/user'
+  import { ElTag, ElMessageBox, ElButton } from 'element-plus'
+  import { Edit, Delete, Key } from '@element-plus/icons-vue'
   import UserEditDialog from './modules/user-edit-dialog.vue'
-  import { ElTag, ElMessageBox } from 'element-plus'
   import { UserRowItem } from '@/types/user'
   import { getDeptTreeNoTop } from '@/api/dept'
   import { DeptOptionItem } from '@/types/dept'
@@ -207,20 +207,47 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 170,
+          width: 250,
           fixed: 'right',
           align: 'center',
           formatter: (row: UserRowItem) =>
-            h('div', { style: 'text-align: right' }, [
-              h(ArtButtonTable, {
-                type: 'edit',
-                onClick: () => handleEdit(row)
-              }),
-              h(ArtButtonTable, {
-                type: 'delete',
-                onClick: () => handleDelete(row)
-              })
-            ])
+            h(
+              'div',
+              { style: 'text-align: right; display: flex; gap: 8px; justify-content: flex-end;' },
+              [
+                h(
+                  ElButton,
+                  {
+                    type: 'warning',
+                    vAuth: 'system:userManage:resetDefaultPassword',
+                    link: true,
+                    icon: Key,
+                    onClick: () => handleResetPassword(row)
+                  },
+                  () => '重置密码'
+                ),
+                h(
+                  ElButton,
+                  {
+                    type: 'primary',
+                    link: true,
+                    icon: Edit,
+                    onClick: () => handleEdit(row)
+                  },
+                  () => '编辑'
+                ),
+                h(
+                  ElButton,
+                  {
+                    type: 'danger',
+                    link: true,
+                    icon: Delete,
+                    onClick: () => handleDelete(row)
+                  },
+                  () => '删除'
+                )
+              ]
+            )
         }
       ]
     }
@@ -267,18 +294,29 @@
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
+    }).then(() => {
+      delUser(row.id as number).then((res) => {
+        if (res) {
+          ElMessage.success('删除成功')
+          refreshData()
+        }
+      })
     })
-      .then(() => {
-        delUser(row.id as number).then((res) => {
-          if (res) {
-            ElMessage.success('删除成功')
-            refreshData()
-          }
-        })
+  }
+
+  // 重置密码
+  const handleResetPassword = (row: UserRowItem) => {
+    ElMessageBox.confirm(`确定重置用户"${row.userName}"的密码为默认密码吗？`, '重置密码确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      resetDefaultPassword(row.id as number).then((res) => {
+        if (res) {
+          ElMessage.success('重置密码成功')
+        }
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+    })
   }
 
   // 左侧树相关

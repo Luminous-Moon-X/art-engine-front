@@ -46,3 +46,10 @@ export function delUser(id: number) {
     data: { ids: [id] }
   })
 }
+
+// 重置用户密码为默认密码
+export function resetDefaultPassword(id: number) {
+  return request.put<boolean>({
+    url: `/api/user/resetDefaultPassword?userId=${id}`
+  })
+}
