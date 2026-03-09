@@ -1,6 +1,20 @@
 import request from '@/utils/http'
 import { type UserRowItem, type UserSearchParams, type DeptUserTreeItem } from '@/types/user'
 
+// 获取当前用户详细信息
+export function fetchGetCurrentUser() {
+  return request.get<UserRowItem>({
+    url: '/api/user/current'
+  })
+}
+
+// 根据ID获取用户信息
+export function fetchGetUserById(id: number) {
+  return request.get<UserRowItem>({
+    url: `/api/user/${id}`
+  })
+}
+
 // 获取用户列表
 export function fetchGetUserList(params: UserSearchParams) {
   return request.post<UserRowItem[]>({
