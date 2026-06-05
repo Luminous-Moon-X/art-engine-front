@@ -61,6 +61,50 @@ export const systemRoutes: AppRouteRecord = {
       }
     },
     {
+      path: 'log',
+      name: 'Log',
+      meta: {
+        title: 'menus.system.log',
+        icon: 'ri:file-list-line',
+        roles: ['R_SUPER', 'R_ADMIN']
+      },
+      children: [
+        {
+          path: 'login-log',
+          name: 'LoginLog',
+          component: '/system/log/login-log',
+          meta: {
+            title: 'menus.system.loginLog',
+            icon: 'ri:login-box-line',
+            keepAlive: true,
+            roles: ['R_SUPER', 'R_ADMIN']
+          }
+        },
+        {
+          path: 'menu-log',
+          name: 'MenuLog',
+          component: '/system/log/menu-log',
+          meta: {
+            title: 'menus.system.menuLog',
+            icon: 'ri:menu-line',
+            keepAlive: true,
+            roles: ['R_SUPER', 'R_ADMIN']
+          }
+        },
+        {
+          path: 'api-log',
+          name: 'ApiLog',
+          component: '/system/log/api-log',
+          meta: {
+            title: 'menus.system.apiLog',
+            icon: 'ri:code-line',
+            keepAlive: true,
+            roles: ['R_SUPER', 'R_ADMIN']
+          }
+        }
+      ]
+    },
+    {
       path: 'nested',
       name: 'Nested',
       component: '',
