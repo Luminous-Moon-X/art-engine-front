@@ -16,7 +16,12 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton type="danger" :disabled="!selectedIds.length" @click="handleBatchDelete" v-ripple>
+            <ElButton
+              type="danger"
+              :disabled="!selectedIds.length"
+              @click="handleBatchDelete"
+              v-ripple
+            >
               批量删除
             </ElButton>
           </ElSpace>
@@ -45,14 +50,12 @@
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetApiLogList, delApiLog } from '@/api/log'
   import { ElTag, ElMessageBox, ElButton } from 'element-plus'
-  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import { ApiLogRowItem } from '@/types/log'
   import ApiLogDetailDialog from './modules/api-log-detail-dialog.vue'
 
   defineOptions({ name: 'ApiLog' })
 
   // --- 搜索相关 ---
-  const showSearchBar = ref(false)
   interface SearchFormState {
     userName: string
     requestUrl: string
@@ -122,57 +125,32 @@
         {
           prop: 'userName',
           label: '用户名',
-          width: 120
+          width: 130
         },
         {
           prop: 'nickName',
           label: '用户昵称',
-          width: 120
+          width: 130
         },
         {
           prop: 'description',
           label: '操作描述',
-          width: 150
+          width: 170
         },
         {
           prop: 'requestUrl',
           label: '请求URL',
-          minWidth: 250
-        },
-        {
-          prop: 'requestMethod',
-          label: '请求方法',
-          width: 100,
-          formatter: (row: ApiLogRowItem) => {
-            const methodColors: Record<string, string> = {
-              GET: 'success',
-              POST: 'primary',
-              PUT: 'warning',
-              DELETE: 'danger',
-              PATCH: 'info'
-            }
-            return h(
-              ElTag,
-              {
-                type: (methodColors[row.requestMethod] || 'info') as
-                  | 'success'
-                  | 'primary'
-                  | 'warning'
-                  | 'danger'
-                  | 'info'
-              },
-              () => row.requestMethod
-            )
-          }
+          minWidth: 200
         },
         {
           prop: 'responseCode',
           label: '响应码',
           width: 90,
           formatter: (row: ApiLogRowItem) => {
-            const codeConfig = row.responseCode === 200
-              ? { type: 'success', text: String(row.responseCode) }
-              : { type: 'danger', text: String(row.responseCode) }
+            const codeConfig =
+              row.responseCode === 200
+                ? { type: 'success', text: String(row.responseCode) }
+                : { type: 'danger', text: String(row.responseCode) }
             return h(
               ElTag,
               { type: codeConfig.type as 'success' | 'danger' },
@@ -217,10 +195,15 @@
                 },
                 () => '详情'
               ),
-              h(ArtButtonTable, {
-                type: 'delete',
-                onClick: () => handleDelete(row)
-              })
+              h(
+                ElButton,
+                {
+                  type: 'danger',
+                  link: true,
+                  onClick: () => handleDelete(row)
+                },
+                () => '删除'
+              )
             ])
         }
       ]
@@ -261,9 +244,7 @@
           }
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 
   // 批量删除
@@ -280,8 +261,6 @@
           refreshData()
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>
