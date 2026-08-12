@@ -50,6 +50,7 @@
   import { fetchGetMenuById, addMenu, editMenu } from '@/api/menu'
 
   const { width } = useWindowSize()
+  const switchProps = { activeValue: 1, inactiveValue: 0 }
 
   /**
    * 创建带 tooltip 的表单标签
@@ -99,7 +100,7 @@
 
   const form = reactive<MenuRowItem & { menuType: 'menu' | 'button' }>({
     id: null,
-    enableFlag: true,
+    enableFlag: 1,
     menuType: 'menu',
     menuName: '',
     routePath: '',
@@ -109,13 +110,13 @@
     orderNum: 1,
     externalLink: '',
     activationPath: '',
-    keepAlive: false,
-    hideFlag: false,
-    iframeFlag: false,
-    showBadge: false,
-    fixedTab: false,
-    hideTab: false,
-    fullScreen: false,
+    keepAlive: 0,
+    hideFlag: 0,
+    iframeFlag: 0,
+    showBadge: 0,
+    fixedTab: 0,
+    hideTab: 0,
+    fullScreen: 0,
     parentId: -1,
     children: []
   })
@@ -193,14 +194,56 @@
           type: 'input',
           props: { placeholder: '如：/system/user' }
         },
-        { label: '是否启用', key: 'enableFlag', type: 'switch', span: switchSpan },
-        { label: '页面缓存', key: 'keepAlive', type: 'switch', span: switchSpan },
-        { label: '隐藏菜单', key: 'hideFlag', type: 'switch', span: switchSpan },
-        { label: '是否内嵌', key: 'iframeFlag', type: 'switch', span: switchSpan },
-        { label: '显示徽章', key: 'showBadge', type: 'switch', span: switchSpan },
-        { label: '固定标签', key: 'fixedTab', type: 'switch', span: switchSpan },
-        { label: '隐藏标签', key: 'hideTab', type: 'switch', span: switchSpan },
-        { label: '全屏页面', key: 'fullScreen', type: 'switch', span: switchSpan }
+        {
+          label: '是否启用',
+          key: 'enableFlag',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        {
+          label: '页面缓存',
+          key: 'keepAlive',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        {
+          label: '隐藏菜单',
+          key: 'hideFlag',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        {
+          label: '是否内嵌',
+          key: 'iframeFlag',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        {
+          label: '显示徽章',
+          key: 'showBadge',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        {
+          label: '固定标签',
+          key: 'fixedTab',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        },
+        { label: '隐藏标签', key: 'hideTab', type: 'switch', props: switchProps, span: switchSpan },
+        {
+          label: '全屏页面',
+          key: 'fullScreen',
+          type: 'switch',
+          props: switchProps,
+          span: switchSpan
+        }
       ]
     } else {
       return [
@@ -237,7 +280,15 @@
    */
   const resetForm = (): void => {
     formRef.value?.reset()
-    form.enableFlag = true
+    form.id = null
+    form.enableFlag = 1
+    form.keepAlive = 0
+    form.hideFlag = 0
+    form.iframeFlag = 0
+    form.showBadge = 0
+    form.fixedTab = 0
+    form.hideTab = 0
+    form.fullScreen = 0
     form.menuType = 'menu'
     form.orderNum = 1
   }

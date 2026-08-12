@@ -3,7 +3,7 @@ export interface MenuRowItem {
   // 主键ID
   id: number | null
   // 是否启用
-  enableFlag: boolean
+  enableFlag: number
   // 菜单类型
   menuType: 'menu' | 'button'
   // 菜单名称
@@ -23,19 +23,19 @@ export interface MenuRowItem {
   // 激活路径
   activationPath: string
   // 是否缓存
-  keepAlive: boolean
+  keepAlive: number
   // 是否隐藏
-  hideFlag: boolean
+  hideFlag: number
   // 是否为Iframe
-  iframeFlag: boolean
+  iframeFlag: number
   // 是否显示徽章
-  showBadge: boolean
+  showBadge: number
   // 是否固定标签页
-  fixedTab: boolean
+  fixedTab: number
   // 是否隐藏标签页
-  hideTab: boolean
+  hideTab: number
   // 是否全屏显示
-  fullScreen: boolean
+  fullScreen: number
   // 父ID
   parentId: number | null
   // 子菜单列表
