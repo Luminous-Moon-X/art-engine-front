@@ -86,6 +86,11 @@ axiosInstance.interceptors.request.use(
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse<BaseResponse>) => {
+    const { responseType } = response.config
+    // blob / arraybuffer 是原始二进制响应，不按 BaseResponse 解析
+    if (responseType === 'blob' || responseType === 'arraybuffer') {
+      return response
+    }
     const { code, msg } = response.data
     if (code === ApiStatus.success) return response
     if (code === ApiStatus.unauthorized) handleUnauthorizedError(msg)
@@ -183,6 +188,10 @@ async function request<T = any>(config: ExtendedAxiosRequestConfig): Promise<T> 
     // 显示成功消息
     if (config.showSuccessMessage && res.data.msg) {
       showSuccess(res.data.msg)
+    }
+
+    if (config.responseType === 'blob' || config.responseType === 'arraybuffer') {
+      return res.data as T
     }
 
     return res.data.data as T

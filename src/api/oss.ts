@@ -59,7 +59,7 @@ export function deleteOssConfig(ids: number[]) {
 /**
  * 上传文件到当前启用的对象存储
  */
-export function uploadOssFile(file: File, directory?: string) {
+export function uploadOssFile(file: File, directory?: string | null) {
   const formData = new FormData()
   formData.append('file', file)
   if (directory) {
@@ -69,6 +69,13 @@ export function uploadOssFile(file: File, directory?: string) {
     url: '/api/oss/file/upload',
     data: formData
   })
+}
+
+/**
+ * 下载文件
+ */
+export function downloadOssFile(id: number) {
+  return request.get<Blob>({ url: `/api/oss/file/download/${id}`, responseType: 'blob' })
 }
 
 /**

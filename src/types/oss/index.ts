@@ -24,6 +24,11 @@ export interface OssConfigForm {
   remark: string
 }
 
+export interface OssFileUploadForm {
+  file: File | null
+  directory?: string | null
+}
+
 export type OssConfigSubmitParams = Omit<OssConfigForm, 'enableFlag'> & {
   enableFlag: number
 }

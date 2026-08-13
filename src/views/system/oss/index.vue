@@ -61,7 +61,7 @@
     },
     {
       key: 'bucketName',
-      label: '桶（Bucket）',
+      label: '桶',
       type: 'input',
       props: { placeholder: '请输入Bucket名称' }
     },
