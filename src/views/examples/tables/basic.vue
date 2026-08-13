@@ -28,8 +28,8 @@
     core: {
       apiFn: fetchGetUserList,
       apiParams: {
-        current: 1,
-        size: 20,
+        pageNumber: 1,
+        pageSize: 20,
         userName: '',
         userPhone: '',
         userEmail: ''

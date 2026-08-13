@@ -18,7 +18,7 @@
         :showZebra="false"
         :loading="loading"
         v-model:columns="columnChecks"
-        @refresh="handleRefresh"
+        @refresh="refreshData"
       >
         <template #left>
           <ElButton type="primary" :icon="Plus" @click="handleAdd" v-ripple> 添加租户 </ElButton>
@@ -104,7 +104,8 @@
     handleCurrentChange,
     getData,
     searchParams,
-    resetSearchParams
+    resetSearchParams,
+    refreshData
   } = useTable({
     core: {
       apiFn: fetchTenantList,

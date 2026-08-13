@@ -684,7 +684,7 @@
         // 在API调用前添加调试信息
         const requestKey = JSON.stringify(params)
         console.log('🚀 API 请求参数:', params)
-        addCacheLog(`🚀 API 请求: current=${params.current}, size=${params.size}`)
+        addCacheLog(`🚀 API 请求: current=${params.pageNumber}, size=${params.pageSize}`)
         addCacheLog(`🔑 请求键: ${requestKey.substring(0, 100)}...`)
 
         // 记录缓存键（这里假设会被缓存）
@@ -693,8 +693,8 @@
         return fetchGetUserList(params)
       },
       apiParams: {
-        current: 1,
-        size: 20,
+        pageNumber: 1,
+        pageSize: 20,
         ...searchFormState.value
       },
       // 排除 apiParams 中的属性
@@ -947,9 +947,9 @@
       数据条数: data.value.length,
       选中条数: selectedRows.value.length,
       列数: columns?.value?.length ?? 0,
-      当前页: pagination.current,
-      每页大小: pagination.size,
-      总条数: pagination.total
+      当前页: pagination.pageNumber,
+      每页大小: pagination.pageSize,
+      总条数: pagination.totalRow
     }
 
     console.log('表格信息:', info)
@@ -1177,7 +1177,7 @@
 
   // 监听分页和搜索状态变化
   watch(
-    () => [pagination.current, pagination.size, searchFormState.value],
+    () => [pagination.pageNumber, pagination.pageSize, searchFormState.value],
     ([current, size, search]) => {
       requestParams.value = {
         ...(search as any),
