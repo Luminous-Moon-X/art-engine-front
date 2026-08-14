@@ -1,0 +1,7 @@
+allowBuilds:
+  '@parcel/watcher': false
+  '@tailwindcss/oxide': false
+  core-js: false
+  es5-ext: false
+  esbuild: false
+  vue-demi: false
