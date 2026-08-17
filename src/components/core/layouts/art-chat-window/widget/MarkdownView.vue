@@ -72,7 +72,7 @@
 
 <style scoped lang="scss">
   .markdown-view {
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     word-break: break-word;
 
@@ -106,7 +106,7 @@
     :deep(h4),
     :deep(h5),
     :deep(h6) {
-      font-size: 14px;
+      font-size: 15px;
     }
 
     :deep(ul),
@@ -143,7 +143,7 @@
     :deep(code) {
       padding: 2px 5px;
       font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-      font-size: 13px;
+      font-size: 14px;
       color: inherit;
       background-color: color-mix(in srgb, var(--art-gray-400) 40%, transparent);
       border-radius: 4px;
@@ -160,7 +160,7 @@
 
     :deep(pre code) {
       padding: 0;
-      font-size: 13px;
+      font-size: 14px;
       color: inherit;
       background-color: transparent;
     }

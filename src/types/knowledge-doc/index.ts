@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 知识库文档管理相关类型
  */
 
@@ -32,3 +32,17 @@ export interface KnowledgeDocRowItem {
 export type KnowledgeDocSearchParams = Partial<
   Pick<KnowledgeDocRowItem, 'docName'> & Api.Common.CommonSearchParams
 >
+
+/** 文档内容行数据 */
+export interface KnowledgeDocContentItem {
+  /** 主键 */
+  id?: number
+  /** 关联文档ID */
+  docId: number
+  /** 文档内容（markdown文本） */
+  content?: string
+  /** 内容解析开始时间 */
+  parseStartTime?: string
+  /** 内容解析结束时间 */
+  parseEndTime?: string
+}

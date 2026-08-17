@@ -37,6 +37,39 @@
       >
       </ArtTable>
     </ElCard>
+
+    <!-- 编辑文档内容抽屉 -->
+    <ElDrawer
+      v-model="editDrawerVisible"
+      class="art-edit-content-drawer"
+      size="85%"
+      :destroy-on-close="true"
+    >
+      <template #header>
+        <div>
+          <p class="text-base font-medium">编辑文档内容</p>
+          <p class="mt-1 text-sm text-g-500">{{ editDocName }}</p>
+        </div>
+      </template>
+
+      <div v-loading="contentLoading" class="flex-1 min-h-0">
+        <ArtMarkdownEditor
+          v-if="editDrawerVisible"
+          v-model="editContent"
+          height="100%"
+          placeholder="请输入文档内容..."
+        />
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <ElButton @click="editDrawerVisible = false">取消</ElButton>
+          <ElButton type="primary" :loading="savingContent" @click="handleSaveContent"
+            >保存</ElButton
+          >
+        </div>
+      </template>
+    </ElDrawer>
   </div>
 </template>
 
@@ -47,10 +80,12 @@
     fetchKnowledgeDocPage,
     parseKnowledgeDoc,
     vectorKnowledgeDoc,
+    fetchKnowledgeDocContent,
+    updateKnowledgeDocContent,
     deleteKnowledgeDoc
   } from '@/api/knowledge-doc'
   import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
-  import { Delete, Document, MagicStick } from '@element-plus/icons-vue'
+  import { Delete, Document, EditPen, MagicStick } from '@element-plus/icons-vue'
   import type { KnowledgeDocRowItem, KnowledgeDocStatus } from '@/types/knowledge-doc'
   import type { UploadFile } from 'element-plus'
   import type { VNode } from 'vue'
@@ -87,6 +122,19 @@
 
   /** 上传组件引用 */
   const uploadRef = ref()
+
+  /** 编辑内容抽屉是否可见 */
+  const editDrawerVisible = ref(false)
+  /** 正在编辑内容的文档ID */
+  const editDocId = ref(0)
+  /** 正在编辑内容的文档名称 */
+  const editDocName = ref('')
+  /** 编辑中的文档内容 */
+  const editContent = ref('')
+  /** 内容加载中状态 */
+  const contentLoading = ref(false)
+  /** 保存内容中状态 */
+  const savingContent = ref(false)
 
   const {
     columns,
@@ -160,7 +208,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 240,
+          width: 300,
           fixed: 'right',
           align: 'center',
           formatter: (row: KnowledgeDocRowItem) => renderOperation(row)
@@ -189,6 +237,22 @@
         },
         () => '解析文档'
       ),
+      // 仅当文档解析完成时显示编辑内容按钮
+      ...(row.parseStatus === 'complete'
+        ? [
+            h(
+              ElButton,
+              {
+                type: 'primary',
+                link: true,
+                size: 'small',
+                icon: EditPen,
+                onClick: () => handleEditContent(row)
+              },
+              () => '编辑内容'
+            )
+          ]
+        : []),
       h(
         ElButton,
         {
@@ -254,9 +318,41 @@
           refreshData()
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消解析')
-      })
+      .catch(() => {})
+  }
+
+  /** 打开编辑内容抽屉并加载文档内容 */
+  const handleEditContent = async (row: KnowledgeDocRowItem) => {
+    editDocId.value = row.id
+    editDocName.value = row.docName
+    editContent.value = ''
+    editDrawerVisible.value = true
+    contentLoading.value = true
+    try {
+      const res = await fetchKnowledgeDocContent(row.id)
+      editContent.value = res?.content ?? ''
+    } catch (error) {
+      console.log('获取文档内容失败:', error)
+    } finally {
+      contentLoading.value = false
+    }
+  }
+
+  /** 保存编辑后的文档内容 */
+  const handleSaveContent = async () => {
+    savingContent.value = true
+    try {
+      const res = await updateKnowledgeDocContent(editDocId.value, editContent.value)
+      if (res) {
+        ElMessage.success('保存成功')
+        editDrawerVisible.value = false
+        refreshData()
+      }
+    } catch (error) {
+      console.log('保存文档内容失败:', error)
+    } finally {
+      savingContent.value = false
+    }
   }
 
   /** 处理向量：先校验文档解析状态，确认后调用后端接口 */
@@ -277,9 +373,7 @@
           refreshData()
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消向量处理')
-      })
+      .catch(() => {})
   }
 
   /** 删除文档 */
@@ -297,10 +391,17 @@
           }
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>
 
-<style scoped></style>
+<style lang="scss">
+  /* 编辑内容抽屉：内容区占满剩余高度，markdown编辑器随抽屉尺寸自适应 */
+  .art-edit-content-drawer {
+    .el-drawer__body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  }
+</style>

@@ -1014,7 +1014,7 @@
         refreshRemove()
       }, 1000)
     } catch {
-      ElMessage.info('已取消删除')
+      /* 用户取消删除 */
     }
   }
 
@@ -1040,7 +1040,7 @@
         refreshRemove()
       }, 1000)
     } catch {
-      ElMessage.info('已取消删除')
+      /* 用户取消批量删除 */
     }
   }
 

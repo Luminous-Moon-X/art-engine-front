@@ -209,8 +209,6 @@
           }
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>

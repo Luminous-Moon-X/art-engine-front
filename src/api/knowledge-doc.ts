@@ -1,9 +1,13 @@
-/**
+﻿/**
  * 知识库文档管理相关接口
  */
 
 import request from '@/utils/http'
-import type { KnowledgeDocRowItem, KnowledgeDocSearchParams } from '@/types/knowledge-doc'
+import type {
+  KnowledgeDocRowItem,
+  KnowledgeDocSearchParams,
+  KnowledgeDocContentItem
+} from '@/types/knowledge-doc'
 
 /**
  * 上传知识库文档
@@ -42,6 +46,25 @@ export function parseKnowledgeDoc(id: number) {
 export function vectorKnowledgeDoc(id: number) {
   return request.post<boolean>({
     url: `/api/knowledge/doc/vector/${id}`
+  })
+}
+
+/**
+ * 查询文档内容
+ */
+export function fetchKnowledgeDocContent(docId: number) {
+  return request.get<KnowledgeDocContentItem>({
+    url: `/api/knowledge/doc/content/${docId}`
+  })
+}
+
+/**
+ * 更新文档内容
+ */
+export function updateKnowledgeDocContent(docId: number, content: string) {
+  return request.put<boolean>({
+    url: '/api/knowledge/doc/content',
+    data: { docId, content }
   })
 }
 

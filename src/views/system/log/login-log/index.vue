@@ -16,7 +16,12 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton type="danger" :disabled="!selectedIds.length" @click="handleBatchDelete" v-ripple>
+            <ElButton
+              type="danger"
+              :disabled="!selectedIds.length"
+              @click="handleBatchDelete"
+              v-ripple
+            >
               批量删除
             </ElButton>
           </ElSpace>
@@ -42,14 +47,12 @@
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetLoginLogList, delLoginLog } from '@/api/log'
   import { ElTag, ElMessageBox, ElButton } from 'element-plus'
-  import { Delete } from '@element-plus/icons-vue'
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import { LoginLogRowItem } from '@/types/log'
 
   defineOptions({ name: 'LoginLog' })
 
   // --- 搜索相关 ---
-  const showSearchBar = ref(false)
   interface SearchFormState {
     userName: string
     nickName: string
@@ -147,9 +150,10 @@
           label: '登录状态',
           width: 100,
           formatter: (row: LoginLogRowItem) => {
-            const statusConfig = row.status === 1
-              ? { type: 'success', text: '成功' }
-              : { type: 'danger', text: '失败' }
+            const statusConfig =
+              row.status === 1
+                ? { type: 'success', text: '成功' }
+                : { type: 'danger', text: '失败' }
             return h(
               ElTag,
               { type: statusConfig.type as 'success' | 'danger' },
@@ -208,9 +212,7 @@
           }
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 
   // 批量删除
@@ -228,8 +230,6 @@
           refreshData()
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>

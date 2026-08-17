@@ -16,7 +16,12 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton type="danger" :disabled="!selectedIds.length" @click="handleBatchDelete" v-ripple>
+            <ElButton
+              type="danger"
+              :disabled="!selectedIds.length"
+              @click="handleBatchDelete"
+              v-ripple
+            >
               批量删除
             </ElButton>
           </ElSpace>
@@ -48,7 +53,6 @@
   defineOptions({ name: 'MenuLog' })
 
   // --- 搜索相关 ---
-  const showSearchBar = ref(false)
   interface SearchFormState {
     userName: string
     nickName: string
@@ -182,9 +186,7 @@
           }
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 
   // 批量删除
@@ -201,8 +203,6 @@
           refreshData()
         })
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>

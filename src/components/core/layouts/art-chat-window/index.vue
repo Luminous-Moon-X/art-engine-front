@@ -15,11 +15,9 @@
             <aside class="flex w-72 shrink-0 flex-col border-r border-g-400/50 max-sm:w-44">
               <!-- 品牌区 -->
               <div class="flex items-center gap-2.5 px-4 pb-3 pt-4">
-                <div class="bot-logo">
-                  <ArtSvgIcon icon="ri:sparkling-2-line" class="text-lg text-white" />
-                </div>
-                <div class="min-w-0">
-                  <p class="text-sm font-semibold leading-5">Art AI</p>
+                <ArtLogo :size="34" class="shrink-0" />
+                <div class="flex min-w-0 flex-1 items-center justify-between gap-2">
+                  <p class="shrink-0 text-lg font-bold leading-5 text-gray-600">Art 智能助手</p>
                   <p
                     class="flex items-center gap-1 text-[11px] leading-4"
                     :class="isOnline ? 'text-g-500' : 'text-danger'"
@@ -28,7 +26,7 @@
                       class="inline-block h-1.5 w-1.5 rounded-full"
                       :class="isOnline ? 'bg-success' : 'bg-danger'"
                     ></span>
-                    {{ isOnline ? '在线 · DeepSeek' : '连接异常' }}
+                    {{ isOnline ? '在线' : '连接异常' }}
                   </p>
                 </div>
               </div>
@@ -97,7 +95,7 @@
                 <!-- 欢迎区 -->
                 <div
                   v-if="messages.length === 0 && !isLoadingMessages"
-                  class="flex min-h-[340px] flex-col items-center justify-center pb-6 text-center"
+                  class="mx-auto flex min-h-[340px] w-full max-w-[780px] flex-col items-center justify-center pb-6 text-center"
                 >
                   <div class="welcome-logo">
                     <ArtSvgIcon icon="ri:sparkling-2-line" class="text-3xl text-white" />
@@ -119,22 +117,13 @@
                 <!-- 消息列表 -->
                 <template v-for="message in messages" :key="message.id">
                   <div
-                    class="msg-row"
+                    class="msg-row mx-auto w-full max-w-[780px]"
                     :class="message.type === 'USER' ? 'msg-row-user' : 'msg-row-ai'"
                   >
-                    <ElAvatar
-                      :size="34"
-                      :src="message.type === 'USER' ? meAvatar : aiAvatar"
-                      class="msg-avatar shrink-0"
-                    />
                     <div
                       class="msg-body"
                       :class="message.type === 'USER' ? 'items-end' : 'items-start'"
                     >
-                      <div class="msg-meta">
-                        <span>{{ message.type === 'USER' ? userName : 'Art Bot' }}</span>
-                        <span>{{ message.time }}</span>
-                      </div>
                       <div v-if="message.type === 'USER'" class="user-bubble">
                         {{ message.content }}
                       </div>
@@ -148,6 +137,21 @@
                           {{ message.error }}
                         </div>
                       </div>
+                      <div v-if="message.type === 'AI' && message.content" class="msg-actions">
+                        <button
+                          class="copy-btn"
+                          :class="{ copied: copiedMessageId === message.id }"
+                          :title="'复制AI回答的markdown文本'"
+                          @click="copyAiMessage(message)"
+                        >
+                          <ArtSvgIcon
+                            :icon="
+                              copiedMessageId === message.id ? 'ri:check-line' : 'ri:file-copy-line'
+                            "
+                            class="text-lg"
+                          />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </template>
@@ -155,7 +159,10 @@
 
               <!-- 输入区域 -->
               <footer class="px-5 pb-4 pt-1">
-                <div class="input-shell" :class="{ focused: inputFocused }">
+                <div
+                  class="input-shell mx-auto w-full max-w-[820px]"
+                  :class="{ focused: inputFocused }"
+                >
                   <textarea
                     ref="inputRef"
                     v-model="messageText"
@@ -180,7 +187,7 @@
                     <span v-else class="stop-icon"></span>
                   </button>
                 </div>
-                <p class="mt-2 text-center text-[11px] text-g-400"
+                <p class="mx-auto mt-2 w-full max-w-[820px] text-center text-[11px] text-g-400"
                   >AI 生成内容仅供参考，请注意甄别</p
                 >
               </footer>
@@ -196,7 +203,6 @@
   import { Loading } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
   import { mittBus } from '@/utils/sys'
-  import { useUserStore } from '@/store/modules/user'
   import { fetchAiChatMessages, fetchAiConversations, streamAiChat } from '@/api/ai-chat'
   import type {
     AiChatDoneEvent,
@@ -205,8 +211,6 @@
     ChatMessageType
   } from '@/types/ai-chat'
   import MarkdownView from './widget/MarkdownView.vue'
-  import meAvatar from '@/assets/images/avatar/avatar5.webp'
-  import aiAvatar from '@/assets/images/avatar/avatar10.webp'
 
   defineOptions({ name: 'ArtChatWindow' })
 
@@ -251,6 +255,50 @@
   const messageText = ref('')
   const inputRef = ref<HTMLTextAreaElement | null>(null)
 
+  // 复制状态
+  const copiedMessageId = ref<number | null>(null)
+  let copyTimer: ReturnType<typeof setTimeout> | null = null
+
+  /**
+   * 复制文本到剪贴板（兼容非安全上下文降级方案）
+   */
+  const copyText = async (text: string): Promise<void> => {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return
+    }
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(textarea)
+    if (!ok) {
+      throw new Error('复制失败')
+    }
+  }
+
+  /**
+   * 复制AI回答的markdown文本
+   */
+  const copyAiMessage = async (message: LocalChatMessage): Promise<void> => {
+    try {
+      await copyText(message.content)
+      copiedMessageId.value = message.id
+      if (copyTimer) {
+        clearTimeout(copyTimer)
+      }
+      copyTimer = setTimeout(() => {
+        copiedMessageId.value = null
+      }, 1500)
+    } catch (error) {
+      console.log('复制失败:', error)
+      ElMessage.error('复制失败')
+    }
+  }
+
   // 欢迎区快捷提问
   const suggestions = [
     '介绍一下系统的主要功能',
@@ -258,8 +306,6 @@
     '帮我写一段 Python 快速排序',
     '如何提升团队开发效率'
   ]
-
-  const userName = computed(() => useUserStore().getUserInfo.userName || '我')
 
   const currentConversation = computed(() =>
     conversations.value.find((item) => item.conversationId === activeConversationId.value)
@@ -648,25 +694,6 @@
       background: transparent;
     }
   }
-
-  /* ==================== 品牌区 ==================== */
-  .bot-logo {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    color: #fff;
-    background: linear-gradient(
-      135deg,
-      var(--theme-color),
-      color-mix(in srgb, var(--theme-color) 60%, #8b5cf6)
-    );
-    border-radius: 10px;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-color) 35%, transparent);
-  }
-
   /* ==================== 新对话按钮 ==================== */
   .new-conv-btn {
     display: flex;
@@ -806,56 +833,62 @@
     flex-direction: row-reverse;
   }
 
-  .msg-avatar {
-    box-shadow: 0 0 0 2px var(--art-card-border);
-  }
-
   .msg-body {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    max-width: 76%;
-  }
-
-  .msg-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 11px;
-    color: var(--art-gray-500);
-
-    span:first-child {
-      font-weight: 500;
-      color: var(--art-gray-700);
-    }
-  }
-
-  .msg-row-user .msg-meta {
-    flex-direction: row-reverse;
+    flex: 1;
   }
 
   .user-bubble {
     max-width: 100%;
     padding: 9px 14px;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
-    color: #fff;
+    color: var(--art-gray-900);
     word-break: break-word;
     white-space: pre-wrap;
-    background: var(--theme-color);
+    background: #edf3fe;
     border-radius: 16px 16px 4px;
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--theme-color) 30%, transparent);
   }
 
   .ai-bubble {
-    max-width: 100%;
-    padding: 10px 14px;
-    font-size: 14px;
+    width: 100%;
+    font-size: 15px;
     color: var(--art-gray-900);
-    background: color-mix(in srgb, var(--art-gray-200) 85%, var(--default-box-color));
-    border: 1px solid var(--art-card-border);
-    border-radius: 4px 16px 16px;
+  }
+
+  /* ==================== 消息操作区 ==================== */
+  .msg-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-top: 4px;
+    margin-left: -6px;
+  }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    color: var(--art-gray-500);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease;
+
+    &:hover {
+      color: var(--theme-color);
+      background: color-mix(in srgb, var(--theme-color) 8%, transparent);
+    }
+
+    &.copied {
+      color: var(--theme-color);
+    }
   }
 
   .typing-cursor {
