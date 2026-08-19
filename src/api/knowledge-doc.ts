@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 知识库文档管理相关接口
  */
 
@@ -11,10 +11,13 @@ import type {
 
 /**
  * 上传知识库文档
+ * @param file 文档文件
+ * @param kbId 所属知识库ID
  */
-export function uploadKnowledgeDoc(file: File) {
+export function uploadKnowledgeDoc(file: File, kbId: number) {
   const formData = new FormData()
   formData.append('file', file)
+  formData.append('kbId', String(kbId))
   return request.post<KnowledgeDocRowItem>({
     url: '/api/knowledge/doc/upload',
     data: formData

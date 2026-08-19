@@ -3,405 +3,452 @@
     <ArtSearchBar
       v-model="searchFormState"
       :items="searchItems"
+      class="kb-search-form"
+      label-width="100px"
       :show-reset="true"
       :show-search="true"
       @search="handleSearch"
       @reset="handleReset"
-    />
+    >
+      <template #action>
+        <ElButton type="primary" :icon="Plus" v-ripple @click="openCreate">创建知识库</ElButton>
+      </template>
+    </ArtSearchBar>
 
-    <ElCard class="art-table-card" shadow="never">
-      <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
-        <template #left>
-          <ElUpload
-            ref="uploadRef"
-            :auto-upload="false"
-            :show-file-list="false"
-            :limit="1"
-            accept=".pdf,.doc,.docx,.txt,.md,.xls,.xlsx,.ppt,.pptx,.wps"
-            :on-change="handleUploadChange"
-          >
-            <template #trigger>
-              <ElButton type="primary" :loading="uploading" v-ripple>上传文档</ElButton>
-            </template>
-          </ElUpload>
-        </template>
-      </ArtTableHeader>
-
-      <ArtTable
-        :loading="loading"
-        :data="data"
-        :columns="columns"
-        :pagination="pagination"
-        @pagination:size-change="handleSizeChange"
-        @pagination:current-change="handleCurrentChange"
+    <div class="mt-3 flex-1 min-h-0 overflow-auto">
+      <div v-if="list.length === 0 && !loading" class="flex h-full items-center justify-center">
+        <ElEmpty description="暂无知识库" />
+      </div>
+      <div
+        v-else
+        class="grid grid-cols-5 gap-5 max-2xl:grid-cols-4 max-xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1"
       >
-      </ArtTable>
-    </ElCard>
+        <div
+          v-for="item in list"
+          :key="item.id"
+          class="group cursor-pointer overflow-hidden rounded-lg border border-g-300/60 bg-white transition hover:shadow-md"
+          @click="openDrawer(item)"
+        >
+          <div class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+            <ElImage
+              v-if="coverLoaded(item.coverOssFileId)"
+              class="h-full w-full"
+              :src="coverLoaded(item.coverOssFileId)"
+              fit="cover"
+              lazy
+            />
+            <div v-else-if="coverLoading(item.coverOssFileId)" class="cover-loading">
+              <ElIcon class="is-loading" :size="24"><Loading /></ElIcon>
+            </div>
+            <div v-else class="kb-cover">
+              <span class="kb-cover-title">{{ item.kbName }}</span>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="truncate text-base font-medium text-g-800">{{ item.kbName }}</h3>
+              <div class="flex shrink-0 items-center gap-1" @click.stop>
+                <ElButton link type="primary" size="small" @click="openEdit(item)">编辑</ElButton>
+                <ElButton link type="danger" size="small" @click="handleDelete(item)">删除</ElButton>
+              </div>
+            </div>
+            <p class="mt-1 line-clamp-2 min-h-10 text-sm text-g-500">{{ item.kbDesc || '暂无描述' }}</p>
+            <p class="mt-2 text-xs text-g-400">{{ item.createTime || '' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- 编辑文档内容抽屉 -->
+    <div class="flex justify-center py-4">
+      <ElPagination
+        v-model:current-page="pageNumber"
+        v-model:page-size="pageSize"
+        :total="total"
+        :page-sizes="[12, 24, 48]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @current-change="loadList"
+        @size-change="handleSizeChange"
+      />
+    </div>
+
+    <!-- 创建/编辑知识库弹框 -->
+    <ElDialog
+      v-model="dialogVisible"
+      :title="dialogType === 'add' ? '创建知识库' : '编辑知识库'"
+      width="520px"
+      align-center
+      destroy-on-close
+      @closed="resetForm"
+    >
+      <ElForm ref="formRef" :model="form" :rules="rules" label-width="100px" class="kb-edit-form">
+        <ElFormItem label="知识库名称" prop="kbName">
+          <ElInput v-model="form.kbName" maxlength="100" show-word-limit placeholder="请输入知识库名称" />
+        </ElFormItem>
+        <ElFormItem label="知识库描述" prop="kbDesc">
+          <ElInput
+            v-model="form.kbDesc"
+            type="textarea"
+            :rows="3"
+            maxlength="500"
+            show-word-limit
+            placeholder="请输入知识库描述"
+          />
+        </ElFormItem>
+        <ElFormItem label="封面">
+          <div class="w-full">
+            <ElUpload
+              :auto-upload="false"
+              :show-file-list="false"
+              :limit="1"
+              accept="image/*"
+              :on-change="handleCoverChange"
+            >
+              <template #trigger>
+                <ElButton :loading="coverUploading">上传封面</ElButton>
+              </template>
+            </ElUpload>
+
+            <div
+              v-if="coverLoaded(form.coverOssFileId)"
+              class="mt-3 h-40 w-64 overflow-hidden rounded-md border border-g-200 bg-gray-100"
+            >
+              <ElImage
+                class="h-full w-full"
+                :src="coverLoaded(form.coverOssFileId)"
+                fit="cover"
+              />
+            </div>
+            <div
+              v-else-if="coverLoading(form.coverOssFileId)"
+              class="mt-3 h-40 w-64 overflow-hidden rounded-md"
+            >
+              <div class="cover-loading">
+                <ElIcon class="is-loading" :size="20"><Loading /></ElIcon>
+              </div>
+            </div>
+          </div>
+        </ElFormItem>
+      </ElForm>
+      <template #footer>
+        <ElButton @click="dialogVisible = false">取消</ElButton>
+        <ElButton type="primary" :loading="submitting" @click="handleSubmit">确定</ElButton>
+      </template>
+    </ElDialog>
+
+    <!-- 文档管理抽屉 -->
     <ElDrawer
-      v-model="editDrawerVisible"
-      class="art-edit-content-drawer"
+      v-model="drawerVisible"
+      class="art-kb-drawer"
       size="85%"
       :destroy-on-close="true"
     >
       <template #header>
         <div>
-          <p class="text-base font-medium">编辑文档内容</p>
-          <p class="mt-1 text-sm text-g-500">{{ editDocName }}</p>
+          <p class="text-base font-medium">文档管理</p>
+          <p class="mt-1 text-sm text-g-500">{{ currentKb?.kbName }}</p>
         </div>
       </template>
 
-      <div v-loading="contentLoading" class="flex-1 min-h-0">
-        <ArtMarkdownEditor
-          v-if="editDrawerVisible"
-          v-model="editContent"
-          height="100%"
-          placeholder="请输入文档内容..."
-        />
-      </div>
-
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <ElButton @click="editDrawerVisible = false">取消</ElButton>
-          <ElButton type="primary" :loading="savingContent" @click="handleSaveContent"
-            >保存</ElButton
-          >
-        </div>
-      </template>
+      <KnowledgeDocList v-if="currentKb" :kb-id="currentKb.id" />
     </ElDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { useTable } from '@/hooks/core/useTable'
-  import {
-    uploadKnowledgeDoc,
-    fetchKnowledgeDocPage,
-    parseKnowledgeDoc,
-    vectorKnowledgeDoc,
-    fetchKnowledgeDocContent,
-    updateKnowledgeDocContent,
-    deleteKnowledgeDoc
-  } from '@/api/knowledge-doc'
-  import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
-  import { Delete, Document, EditPen, MagicStick } from '@element-plus/icons-vue'
-  import type { KnowledgeDocRowItem, KnowledgeDocStatus } from '@/types/knowledge-doc'
-  import type { UploadFile } from 'element-plus'
-  import type { VNode } from 'vue'
+  import { fetchKnowledgeBasePage, addKnowledgeBase, editKnowledgeBase, deleteKnowledgeBase } from '@/api/knowledge-base'
+  import { uploadOssFile, downloadOssFile } from '@/api/oss'
+  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { Plus, Loading } from '@element-plus/icons-vue'
+  import type { KnowledgeBaseRowItem, KnowledgeBaseForm } from '@/types/knowledge-base'
+  import type { FormInstance, FormRules, UploadFile } from 'element-plus'
+  import KnowledgeDocList from './modules/knowledge-doc-list.vue'
 
-  defineOptions({ name: 'KnowledgeDocManagement' })
-
-  /** 解析/向量状态展示配置 */
-  const STATUS_MAP: Record<
-    KnowledgeDocStatus,
-    { label: string; type: 'info' | 'warning' | 'success' | 'danger' }
-  > = {
-    pending: { label: '待处理', type: 'info' },
-    processing: { label: '处理中', type: 'warning' },
-    complete: { label: '已完成', type: 'success' },
-    error: { label: '失败', type: 'danger' }
-  }
+  defineOptions({ name: 'KnowledgeBaseManagement' })
 
   /** 查询表单 */
-  const searchFormState = ref<{ docName: string }>({
-    docName: ''
-  })
+  const searchFormState = ref<{ kbName: string }>({ kbName: '' })
 
   const searchItems = computed(() => [
     {
-      key: 'docName',
-      label: '文档名称',
+      key: 'kbName',
+      label: '知识库名称',
       type: 'input',
-      props: { placeholder: '请输入文档名称' }
+      props: { placeholder: '请输入知识库名称' }
     }
   ])
 
-  /** 上传中状态 */
-  const uploading = ref(false)
+  /** 列表数据 */
+  const loading = ref(false)
+  const list = ref<KnowledgeBaseRowItem[]>([])
+  const total = ref(0)
+  const pageNumber = ref(1)
+  const pageSize = ref(12)
 
-  /** 上传组件引用 */
-  const uploadRef = ref()
+  /** 封面文件ID -> 加载状态与临时预览地址（通过后端下载接口获取） */
+  const coverMap = reactive<Record<number, { status: 'loading' | 'success' | 'error'; url?: string }>>({})
 
-  /** 编辑内容抽屉是否可见 */
-  const editDrawerVisible = ref(false)
-  /** 正在编辑内容的文档ID */
-  const editDocId = ref(0)
-  /** 正在编辑内容的文档名称 */
-  const editDocName = ref('')
-  /** 编辑中的文档内容 */
-  const editContent = ref('')
-  /** 内容加载中状态 */
-  const contentLoading = ref(false)
-  /** 保存内容中状态 */
-  const savingContent = ref(false)
-
-  const {
-    columns,
-    columnChecks,
-    data,
-    loading,
-    pagination,
-    getData,
-    searchParams,
-    resetSearchParams,
-    handleSizeChange,
-    handleCurrentChange,
-    refreshData,
-    refreshCreate,
-    refreshRemove
-  } = useTable({
-    core: {
-      apiFn: fetchKnowledgeDocPage,
-      apiParams: {
-        pageNumber: 1,
-        pageSize: 10
-      },
-      columnsFactory: () => [
-        {
-          prop: 'id',
-          label: '文档ID',
-          visible: false
-        },
-        {
-          prop: 'ossFileId',
-          label: 'OSS文件ID',
-          visible: false
-        },
-        {
-          prop: 'docName',
-          label: '文档名称',
-          minWidth: 220,
-          showOverflowTooltip: true
-        },
-        {
-          prop: 'docType',
-          label: '文档类型',
-          width: 110,
-          align: 'center'
-        },
-        {
-          prop: 'parseStatus',
-          label: '解析状态',
-          width: 110,
-          align: 'center',
-          formatter: (row: KnowledgeDocRowItem) => renderStatusTag(row.parseStatus)
-        },
-        {
-          prop: 'vectorStatus',
-          label: '向量状态',
-          width: 110,
-          align: 'center',
-          formatter: (row: KnowledgeDocRowItem) => renderStatusTag(row.vectorStatus)
-        },
-        {
-          prop: 'uploadTime',
-          label: '上传时间',
-          minWidth: 170
-        },
-        {
-          prop: 'uploadName',
-          label: '上传人',
-          width: 120,
-          align: 'center'
-        },
-        {
-          prop: 'operation',
-          label: '操作',
-          width: 300,
-          fixed: 'right',
-          align: 'center',
-          formatter: (row: KnowledgeDocRowItem) => renderOperation(row)
-        }
-      ]
-    }
-  })
-
-  /** 渲染状态标签 */
-  const renderStatusTag = (status: KnowledgeDocStatus): VNode => {
-    const item = STATUS_MAP[status] ?? { label: status, type: 'info' }
-    return h(ElTag, { type: item.type, disableTransitions: true }, () => item.label)
+  /** 封面是否已加载成功，返回可展示的预览地址（空串表示未加载成功） */
+  const coverLoaded = (id?: number | null): string => {
+    if (id == null) return ''
+    const state = coverMap[id]
+    return state?.status === 'success' ? (state.url ?? '') : ''
   }
 
-  /** 渲染操作按钮 */
-  const renderOperation = (row: KnowledgeDocRowItem): VNode => {
-    const buttons: VNode[] = [
-      h(
-        ElButton,
-        {
-          type: 'primary',
-          link: true,
-          size: 'small',
-          icon: Document,
-          onClick: () => handleParse(row)
-        },
-        () => '解析文档'
-      ),
-      // 仅当文档解析完成时显示编辑内容按钮
-      ...(row.parseStatus === 'complete'
-        ? [
-            h(
-              ElButton,
-              {
-                type: 'primary',
-                link: true,
-                size: 'small',
-                icon: EditPen,
-                onClick: () => handleEditContent(row)
-              },
-              () => '编辑内容'
-            )
-          ]
-        : []),
-      h(
-        ElButton,
-        {
-          type: 'primary',
-          link: true,
-          size: 'small',
-          icon: MagicStick,
-          onClick: () => handleVector(row)
-        },
-        () => '处理向量'
-      ),
-      h(
-        ElButton,
-        {
-          type: 'danger',
-          link: true,
-          size: 'small',
-          icon: Delete,
-          onClick: () => handleDelete(row)
-        },
-        () => '删除'
-      )
-    ]
-    return h('div', { class: 'flex justify-center gap-1' }, buttons)
+  /** 封面是否正在加载中 */
+  const coverLoading = (id?: number | null): boolean => {
+    if (id == null) return false
+    return coverMap[id]?.status === 'loading'
   }
 
-  /** 选择文件后上传文档 */
-  const handleUploadChange = async (uploadFile: UploadFile) => {
-    const file = uploadFile.raw
-    if (!file) return
-    uploading.value = true
+  /** 下载封面并生成临时预览地址 */
+  const loadCover = async (id: number) => {
+    if (!id || coverMap[id]) return
+    coverMap[id] = { status: 'loading' }
     try {
-      await uploadKnowledgeDoc(file)
-      ElMessage.success('上传成功')
-      refreshCreate()
+      const blob = await downloadOssFile(id)
+      coverMap[id] = { status: 'success', url: URL.createObjectURL(blob) }
     } catch (error) {
-      console.log('文档上传失败:', error)
+      console.log('加载封面失败:', error)
+      coverMap[id] = { status: 'error' }
+    }
+  }
+
+  /** 创建/编辑弹框 */
+  const dialogVisible = ref(false)
+  const dialogType = ref<'add' | 'edit'>('add')
+  const submitting = ref(false)
+  const formRef = ref<FormInstance>()
+  const form = reactive<KnowledgeBaseForm>({
+    id: null,
+    kbName: '',
+    kbDesc: '',
+    coverOssFileId: null
+  })
+  const rules: FormRules = {
+    kbName: [{ required: true, message: '请输入知识库名称', trigger: 'blur' }]
+  }
+  const coverUploading = ref(false)
+
+  /** 文档管理抽屉 */
+  const drawerVisible = ref(false)
+  const currentKb = ref<KnowledgeBaseRowItem | null>(null)
+
+  const loadList = async () => {
+    loading.value = true
+    try {
+      const res = await fetchKnowledgeBasePage({
+        kbName: searchFormState.value.kbName,
+        pageNumber: pageNumber.value,
+        pageSize: pageSize.value
+      })
+      list.value = res?.records ?? []
+      total.value = res?.totalRow ?? 0
+      list.value.forEach((item) => {
+        if (item.coverOssFileId != null) {
+          loadCover(item.coverOssFileId)
+        }
+      })
+    } catch (error) {
+      console.log('获取知识库列表失败:', error)
     } finally {
-      uploading.value = false
-      uploadRef.value?.clearFiles()
+      loading.value = false
     }
   }
 
   const handleSearch = () => {
-    Object.assign(searchParams, searchFormState.value)
-    getData()
+    pageNumber.value = 1
+    loadList()
   }
 
   const handleReset = () => {
-    resetSearchParams()
+    searchFormState.value.kbName = ''
+    pageNumber.value = 1
+    loadList()
   }
 
-  /** 解析文档：确认后调用后端接口，后端先置processing并异步解析 */
-  const handleParse = (row: KnowledgeDocRowItem) => {
-    ElMessageBox.confirm('确定解析文档"' + row.docName + '"吗？', '解析确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+  const handleSizeChange = () => {
+    pageNumber.value = 1
+    loadList()
+  }
+
+  const resetForm = () => {
+    Object.assign(form, { id: null, kbName: '', kbDesc: '', coverOssFileId: null })
+    formRef.value?.clearValidate()
+  }
+
+  const openCreate = () => {
+    dialogType.value = 'add'
+    resetForm()
+    dialogVisible.value = true
+  }
+
+  const openEdit = (item: KnowledgeBaseRowItem) => {
+    dialogType.value = 'edit'
+    Object.assign(form, {
+      id: item.id,
+      kbName: item.kbName,
+      kbDesc: item.kbDesc ?? '',
+      coverOssFileId: item.coverOssFileId ?? null
     })
-      .then(() => {
-        parseKnowledgeDoc(row.id).then(() => {
-          ElMessage.success('已开始解析文档')
-          refreshData()
-        })
-      })
-      .catch(() => {})
-  }
-
-  /** 打开编辑内容抽屉并加载文档内容 */
-  const handleEditContent = async (row: KnowledgeDocRowItem) => {
-    editDocId.value = row.id
-    editDocName.value = row.docName
-    editContent.value = ''
-    editDrawerVisible.value = true
-    contentLoading.value = true
-    try {
-      const res = await fetchKnowledgeDocContent(row.id)
-      editContent.value = res?.content ?? ''
-    } catch (error) {
-      console.log('获取文档内容失败:', error)
-    } finally {
-      contentLoading.value = false
+    if (item.coverOssFileId != null) {
+      loadCover(item.coverOssFileId)
     }
+    dialogVisible.value = true
   }
 
-  /** 保存编辑后的文档内容 */
-  const handleSaveContent = async () => {
-    savingContent.value = true
+  const handleCoverChange = async (uploadFile: UploadFile) => {
+    const file = uploadFile.raw
+    if (!file) return
+    coverUploading.value = true
     try {
-      const res = await updateKnowledgeDocContent(editDocId.value, editContent.value)
-      if (res) {
-        ElMessage.success('保存成功')
-        editDrawerVisible.value = false
-        refreshData()
+      // 存储对象存储文件ID，桶为私有，展示时通过下载接口获取
+      const res = await uploadOssFile(file, '/knowledge-cover')
+      form.coverOssFileId = res?.id ?? null
+      if (form.coverOssFileId != null) {
+        await loadCover(form.coverOssFileId)
       }
     } catch (error) {
-      console.log('保存文档内容失败:', error)
+      console.log('封面上传失败:', error)
     } finally {
-      savingContent.value = false
+      coverUploading.value = false
     }
   }
 
-  /** 处理向量：先校验文档解析状态，确认后调用后端接口 */
-  const handleVector = (row: KnowledgeDocRowItem) => {
-    // 先校验当前文档是否已经完成文档解析
-    if (row.parseStatus !== 'complete') {
-      ElMessage.warning('请先完成文档解析后再进行向量处理')
+  const handleSubmit = async () => {
+    if (!formRef.value) return
+    try {
+      await formRef.value.validate()
+    } catch {
       return
     }
-    ElMessageBox.confirm('确定对文档"' + row.docName + '"进行向量处理吗？', '向量处理确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-      .then(() => {
-        vectorKnowledgeDoc(row.id).then(() => {
-          ElMessage.success('已开始向量处理')
-          refreshData()
-        })
-      })
-      .catch(() => {})
+    submitting.value = true
+    try {
+      const payload: KnowledgeBaseForm = {
+        id: form.id ?? null,
+        kbName: form.kbName,
+        kbDesc: form.kbDesc,
+        coverOssFileId: form.coverOssFileId ?? null
+      }
+      if (dialogType.value === 'add') {
+        await addKnowledgeBase(payload)
+        ElMessage.success('创建成功')
+      } else {
+        await editKnowledgeBase(payload)
+        ElMessage.success('保存成功')
+      }
+      dialogVisible.value = false
+      loadList()
+    } catch (error) {
+      console.log('提交失败:', error)
+    } finally {
+      submitting.value = false
+    }
   }
 
-  /** 删除文档 */
-  const handleDelete = (row: KnowledgeDocRowItem) => {
-    ElMessageBox.confirm('确定删除文档"' + row.docName + '"吗？此操作不可恢复！', '删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+  const handleDelete = (item: KnowledgeBaseRowItem) => {
+    ElMessageBox.confirm(
+      `确定删除知识库"${item.kbName}"吗？此操作不可恢复！`,
+      '删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
       .then(() => {
-        deleteKnowledgeDoc([row.id]).then((res) => {
+        deleteKnowledgeBase([item.id]).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
-            refreshRemove()
+            loadList()
           }
         })
       })
       .catch(() => {})
   }
+
+  const openDrawer = (item: KnowledgeBaseRowItem) => {
+    currentKb.value = item
+    drawerVisible.value = true
+  }
+
+  onMounted(() => {
+    loadList()
+  })
+
+  onBeforeUnmount(() => {
+    Object.values(coverMap).forEach((state) => {
+      if (state.url) URL.revokeObjectURL(state.url)
+    })
+  })
 </script>
 
 <style lang="scss">
-  /* 编辑内容抽屉：内容区占满剩余高度，markdown编辑器随抽屉尺寸自适应 */
-  .art-edit-content-drawer {
+  /* 防止知识库名称等较长 label 换行 */
+  .kb-search-form,
+  .kb-edit-form {
+    .el-form-item__label {
+      white-space: nowrap;
+    }
+  }
+
+  .art-kb-drawer {
     .el-drawer__body {
       display: flex;
       flex-direction: column;
+      padding: 16px;
       overflow: hidden;
+    }
+  }
+
+  /* 封面加载中 */
+  .cover-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #c0c4cc;
+    background: #f5f7fa;
+  }
+
+  /* 默认封面：传统书籍封皮 */
+  .kb-cover {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #3e4b57 0%, #2b3540 100%);
+    color: #f0e9da;
+
+    /* 压印内框（左右对称） */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(240, 233, 218, 0.4);
+      pointer-events: none;
+    }
+
+    .kb-cover-title {
+      position: relative;
+      z-index: 1;
+      padding: 0 34px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      line-height: 1.65;
+      color: inherit;
+      max-height: 4.95em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      word-break: break-all;
     }
   }
 </style>

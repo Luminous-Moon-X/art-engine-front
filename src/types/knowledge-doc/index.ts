@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 知识库文档管理相关类型
  */
 
@@ -14,6 +14,8 @@ export interface KnowledgeDocRowItem {
   docType?: string
   /** OSS文件表ID */
   ossFileId?: number
+  /** 所属知识库ID */
+  kbId?: number
   /** 内容解析状态 */
   parseStatus: KnowledgeDocStatus
   /** 向量处理状态 */
@@ -30,7 +32,7 @@ export interface KnowledgeDocRowItem {
 
 /** 分页查询参数 */
 export type KnowledgeDocSearchParams = Partial<
-  Pick<KnowledgeDocRowItem, 'docName'> & Api.Common.CommonSearchParams
+  Pick<KnowledgeDocRowItem, 'docName' | 'kbId'> & Api.Common.CommonSearchParams
 >
 
 /** 文档内容行数据 */

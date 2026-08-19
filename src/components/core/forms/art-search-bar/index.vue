@@ -85,6 +85,9 @@
                 {{ t('table.searchBar.search') }}
               </ElButton>
             </div>
+            <div v-if="$slots.action" class="extra-actions">
+              <slot name="action"></slot>
+            </div>
             <div v-if="shouldShowExpandToggle" class="filter-toggle" @click="toggleExpand">
               <span>{{ expandToggleText }}</span>
               <div class="icon-wrapper">
@@ -380,6 +383,13 @@
       .form-buttons {
         display: flex;
         gap: 8px;
+      }
+
+      .extra-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
       }
 
       .filter-toggle {
