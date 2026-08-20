@@ -8,16 +8,16 @@
 
         <!-- 抽屉面板 -->
         <aside
-          class="chat-panel relative flex h-full w-[min(1400px,calc(100vw-32px))] flex-col overflow-hidden max-md:w-full"
+          class="chat-panel relative flex h-full w-[80%] flex-col overflow-hidden max-md:w-full"
         >
           <div class="flex min-h-0 flex-1">
             <!-- 左侧对话列表 -->
-            <aside class="flex w-72 shrink-0 flex-col border-r border-g-400/50 max-sm:w-44">
+            <aside class="flex w-60 shrink-0 flex-col border-r border-g-400/50 max-sm:w-44">
               <!-- 品牌区 -->
               <div class="flex items-center gap-2.5 px-4 pb-3 pt-4">
                 <ArtLogo :size="34" class="shrink-0" />
                 <div class="flex min-w-0 flex-1 items-center justify-between gap-2">
-                  <p class="shrink-0 text-lg font-bold leading-5 text-gray-600">Art 智能助手</p>
+                  <p class="shrink-0 text-xl font-bold leading-6 text-gray-600">Art 智能助手</p>
                   <p
                     class="flex items-center gap-1 text-[11px] leading-4"
                     :class="isOnline ? 'text-g-500' : 'text-danger'"
@@ -39,7 +39,7 @@
                 </button>
               </div>
 
-              <!-- 对话列表 -->
+              <!-- 对话列表：按时间范围分组 -->
               <div class="chat-scroll min-h-0 flex-1 overflow-y-auto px-3 pb-3">
                 <div
                   v-if="isLoadingConversations && conversations.length === 0"
@@ -47,21 +47,56 @@
                 >
                   <ElIcon class="is-loading"><Loading /></ElIcon>
                 </div>
-                <button
-                  v-for="item in conversations"
-                  :key="item.conversationId"
-                  class="conv-item"
-                  :class="{ active: item.conversationId === activeConversationId }"
-                  @click="selectConversation(item)"
-                >
-                  <ArtSvgIcon icon="ri:message-3-line" class="conv-item-icon shrink-0" />
-                  <span class="min-w-0 flex-1 text-left">
-                    <span class="block truncate">{{ item.conversationName }}</span>
-                    <span class="mt-0.5 block text-[11px] text-g-500">
-                      {{ formatConversationTime(item.createTime) }}
-                    </span>
-                  </span>
-                </button>
+
+                <template v-for="group in conversationGroups" :key="group.label">
+                  <div v-if="group.items.length > 0" class="conv-group">
+                    <p class="conv-group-label">{{ group.label }}</p>
+                    <div
+                      v-for="item in group.items"
+                      :key="item.conversationId"
+                      class="conv-item"
+                      :class="{ active: item.conversationId === activeConversationId }"
+                      @click="selectConversation(item)"
+                      @mouseenter="hoverConversationId = item.conversationId"
+                      @mouseleave="hoverConversationId = null"
+                    >
+                      <ArtSvgIcon icon="ri:message-3-line" class="conv-item-icon shrink-0" />
+                      <div class="conv-item-name min-w-0 flex-1">
+                        <!-- 重命名输入 -->
+                        <input
+                          v-if="renamingId === item.conversationId"
+                          ref="renameInputRef"
+                          v-model="renameText"
+                          class="conv-rename-input"
+                          maxlength="50"
+                          @click.stop
+                          @keydown.enter="confirmRename(item)"
+                          @keydown.esc="cancelRename"
+                          @blur="confirmRename(item)"
+                        />
+                        <span v-else class="block truncate">{{ item.conversationName }}</span>
+                      </div>
+                      <!-- 更多按钮（悬停显示） -->
+                      <div
+                        class="conv-more"
+                        :class="{
+                          visible:
+                            hoverConversationId === item.conversationId ||
+                            menuConversationId === item.conversationId
+                        }"
+                      >
+                        <button
+                          class="conv-more-btn"
+                          title="更多操作"
+                          @click.stop="openMenu(item, $event)"
+                        >
+                          <ArtSvgIcon icon="ri:more-2-fill" class="conv-more-icon" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
                 <div
                   v-if="!isLoadingConversations && conversations.length === 0"
                   class="py-10 text-center text-xs text-g-500"
@@ -177,15 +212,19 @@
                     @focus="inputFocused = true"
                     @blur="inputFocused = false"
                   ></textarea>
-                  <button
-                    class="send-btn"
-                    :class="isStreaming ? 'is-stop' : { disabled: !messageText.trim() }"
-                    :title="isStreaming ? '停止生成' : '发送'"
-                    @click="isStreaming ? stopStreaming() : sendMessage()"
-                  >
-                    <ArtSvgIcon v-if="!isStreaming" icon="ri:arrow-up-line" class="text-lg" />
-                    <span v-else class="stop-icon"></span>
-                  </button>
+                  <!-- 输入区底栏：左下知识库选择 + 右下发送按钮 -->
+                  <div class="input-footer">
+                    <KbSelector v-model="selectedKbId" :options="kbOptions" :loading="kbLoading" />
+                    <button
+                      class="send-btn"
+                      :class="isStreaming ? 'is-stop' : { disabled: !messageText.trim() }"
+                      :title="isStreaming ? '停止生成' : '发送'"
+                      @click="isStreaming ? stopStreaming() : sendMessage()"
+                    >
+                      <ArtSvgIcon v-if="!isStreaming" icon="ri:arrow-up-line" class="text-lg" />
+                      <span v-else class="stop-icon"></span>
+                    </button>
+                  </div>
                 </div>
                 <p class="mx-auto mt-2 w-full max-w-[820px] text-center text-[11px] text-g-400"
                   >AI 生成内容仅供参考，请注意甄别</p
@@ -196,6 +235,54 @@
         </aside>
       </div>
     </Transition>
+
+    <!-- 删除对话确认弹框 -->
+    <Transition name="chat-drawer">
+      <div
+        v-if="deleteDialogVisible"
+        class="chat-overlay fixed inset-0 z-[3300] flex items-center justify-center"
+      >
+        <div class="chat-backdrop absolute inset-0" @click="closeDeleteDialog"></div>
+        <div class="delete-dialog">
+          <div class="delete-dialog-icon">
+            <ArtSvgIcon icon="ri:delete-bin-6-line" class="text-2xl text-danger" />
+          </div>
+          <p class="delete-dialog-title">删除对话</p>
+          <p class="delete-dialog-desc">删除后，该对话将不可恢复！</p>
+          <div class="delete-dialog-actions">
+            <button class="delete-dialog-btn cancel" @click="closeDeleteDialog">取消</button>
+            <button
+              class="delete-dialog-btn danger"
+              :disabled="deletingConversation"
+              @click="doDeleteConversation"
+            >
+              {{ deletingConversation ? '删除中…' : '删除对话' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- 对话操作浮动菜单（Teleport 到 body，避免被侧栏溢出裁剪，覆盖在聊天区域之上） -->
+    <Teleport to="body">
+      <Transition name="conv-menu">
+        <div
+          v-if="menuVisible"
+          class="conv-menu"
+          :style="{ top: menuTop + 'px', left: menuLeft + 'px' }"
+          @click.stop
+        >
+          <button class="conv-menu-item" @click="startRename(menuItem)">
+            <ArtSvgIcon icon="ri:edit-line" class="conv-menu-icon" />
+            <span>重命名</span>
+          </button>
+          <button class="conv-menu-item danger" @click="confirmDelete(menuItem)">
+            <ArtSvgIcon icon="ri:delete-bin-line" class="conv-menu-icon" />
+            <span>删除</span>
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </Teleport>
 </template>
 
@@ -203,7 +290,14 @@
   import { Loading } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
   import { mittBus } from '@/utils/sys'
-  import { fetchAiChatMessages, fetchAiConversations, streamAiChat } from '@/api/ai-chat'
+  import {
+    fetchAiChatMessages,
+    fetchAiConversations,
+    streamAiChat,
+    fetchAiKnowledgeBases,
+    renameAiConversation,
+    deleteAiConversation
+  } from '@/api/ai-chat'
   import type {
     AiChatDoneEvent,
     AiChatMessageItem,
@@ -211,6 +305,7 @@
     ChatMessageType
   } from '@/types/ai-chat'
   import MarkdownView from './widget/MarkdownView.vue'
+  import KbSelector from './widget/KbSelector.vue'
 
   defineOptions({ name: 'ArtChatWindow' })
 
@@ -241,6 +336,11 @@
   const isStreaming = ref(false)
   const inputFocused = ref(false)
 
+  // 知识库选择状态
+  const selectedKbId = ref<number | null>(null)
+  const kbOptions = ref<{ value: number; label: string }[]>([])
+  const kbLoading = ref(false)
+
   // 对话相关状态
   const conversations = ref<LocalConversation[]>([])
   const activeConversationId = ref('')
@@ -250,6 +350,22 @@
   const abortController = ref<AbortController | null>(null)
   // 消息加载序号，防止切换对话时的竞态覆盖
   let messagesRequestSeq = 0
+
+  // 对话列表交互状态
+  const hoverConversationId = ref<string | null>(null)
+  const menuConversationId = ref<string | null>(null)
+  /** 浮动菜单显隐与定位 */
+  const menuVisible = ref(false)
+  const menuLeft = ref(0)
+  const menuTop = ref(0)
+  const renamingId = ref<string | null>(null)
+  const renameText = ref('')
+  const renameInputRef = ref<HTMLInputElement | null>(null)
+
+  // 删除确认弹框状态
+  const deleteDialogVisible = ref(false)
+  const deletingConversationId = ref<string | null>(null)
+  const deletingConversation = ref(false)
 
   // 输入状态
   const messageText = ref('')
@@ -314,6 +430,78 @@
     () => currentConversation.value?.conversationName || 'Art Bot'
   )
 
+  /**
+   * 将日期格式化为 yyyy-MM
+   */
+  const formatMonth = (time?: string): string => {
+    if (!time) return '更早'
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime())) return '更早'
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+  }
+
+  /**
+   * 计算距离今天的天数（自然日，以当天零点为基准）
+   */
+  const daysFromToday = (time?: string): number => {
+    if (!time) return Number.MAX_SAFE_INTEGER
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime())) return Number.MAX_SAFE_INTEGER
+    const now = new Date()
+    const dayMs = 24 * 60 * 60 * 1000
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const startOfConv = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+    return Math.round((startOfToday - startOfConv) / dayMs)
+  }
+
+  /** 一组对话：label 为分组标题，items 为该组下的对话 */
+  interface ConversationGroup {
+    label: string
+    items: LocalConversation[]
+  }
+
+  /**
+   * 按时间范围对对话分组：
+   * 今天 / 3天内 / 7天内 / 30天内 / 超过30天按 yyyy-MM 月分组
+   */
+  const conversationGroups = computed<ConversationGroup[]>(() => {
+    const recent: { label: string; maxDays: number }[] = [
+      { label: '今天', maxDays: 0 },
+      { label: '3天内', maxDays: 3 },
+      { label: '7天内', maxDays: 7 },
+      { label: '30天内', maxDays: 30 }
+    ]
+    const groups: ConversationGroup[] = recent.map((g) => ({ label: g.label, items: [] }))
+    const olderByMonth = new Map<string, LocalConversation[]>()
+
+    for (const item of conversations.value) {
+      const days = daysFromToday(item.createTime)
+      let placed = false
+      if (days >= 0) {
+        for (let i = 0; i < recent.length; i++) {
+          if (days <= recent[i].maxDays) {
+            groups[i].items.push(item)
+            placed = true
+            break
+          }
+        }
+      }
+      if (!placed) {
+        // 超出30天，按月份分组
+        const month = formatMonth(item.createTime)
+        if (!olderByMonth.has(month)) {
+          olderByMonth.set(month, [])
+        }
+        olderByMonth.get(month)!.push(item)
+      }
+    }
+    // 拼接近期的四个分组与按月分组（按月倒序：较新的月份在前）
+    const monthGroups: ConversationGroup[] = Array.from(olderByMonth.entries())
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      .map(([label, items]) => ({ label, items }))
+    return [...groups.filter((g) => g.items.length > 0), ...monthGroups]
+  })
+
   // 工具函数
   const formatTime = (time?: string): string => {
     if (!time) return ''
@@ -323,16 +511,128 @@
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`
   }
 
-  const formatConversationTime = (time?: string): string => {
-    if (!time) return ''
-    const date = new Date(time)
-    if (Number.isNaN(date.getTime())) return ''
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const isToday = date.toDateString() === new Date().toDateString()
-    if (isToday) {
-      return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  /** 当前菜单对应的对话 */
+  const menuItem = computed<LocalConversation | undefined>(() =>
+    conversations.value.find((c) => c.conversationId === menuConversationId.value)
+  )
+
+  /** 关闭对话操作菜单 */
+  const closeMenu = (): void => {
+    menuVisible.value = false
+    menuConversationId.value = null
+  }
+
+  /**
+   * 打开对话操作菜单（仅点击按钮触发，需点击才弹出）
+   *
+   * @param item  当前对话
+   * @param event 点击事件，用于计算菜单定位
+   */
+  const openMenu = (item: LocalConversation, event: MouseEvent): void => {
+    const btn = (event.currentTarget as HTMLElement) || (event.target as HTMLElement)
+    const rect = btn.getBoundingClientRect()
+    menuLeft.value = Math.round(rect.left)
+    menuTop.value = Math.round(rect.bottom + 6)
+    menuVisible.value = true
+    menuConversationId.value = item.conversationId
+  }
+
+  /**
+   * 进入重命名状态
+   */
+  const startRename = (item: LocalConversation | undefined): void => {
+    if (!item) return
+    renamingId.value = item.conversationId
+    renameText.value = item.conversationName || ''
+    closeMenu()
+    nextTick(() => {
+      renameInputRef.value?.focus()
+      renameInputRef.value?.select()
+    })
+  }
+
+  /** 当前正在重命名的对话 */
+  const renamingItem = computed<LocalConversation | undefined>(() =>
+    conversations.value.find((c) => c.conversationId === renamingId.value)
+  )
+
+  /**
+   * 取消重命名
+   */
+  const cancelRename = (): void => {
+    renamingId.value = null
+    renameText.value = ''
+  }
+
+  /**
+   * 确认重命名（失焦或回车时调用；空名称或未变化则取消）
+   */
+  const confirmRename = async (item: LocalConversation): Promise<void> => {
+    if (renamingId.value !== item.conversationId) {
+      return
     }
-    return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    const name = renameText.value.trim()
+    renamingId.value = null
+    if (!name || name === (item.conversationName || '')) {
+      renameText.value = ''
+      return
+    }
+    try {
+      await renameAiConversation(item.conversationId, name)
+      item.conversationName = name
+      renameText.value = ''
+    } catch (error) {
+      ElMessage.error((error as Error).message || '重命名失败')
+      renameText.value = ''
+    }
+  }
+
+  /**
+   * 打开删除确认弹框
+   */
+  const confirmDelete = (item: LocalConversation | undefined): void => {
+    if (!item) return
+    deletingConversationId.value = item.conversationId
+    deleteDialogVisible.value = true
+    closeMenu()
+  }
+
+  /**
+   * 关闭删除确认弹框
+   */
+  const closeDeleteDialog = (): void => {
+    deleteDialogVisible.value = false
+    deletingConversationId.value = null
+  }
+
+  /**
+   * 执行删除对话
+   */
+  const doDeleteConversation = async (): Promise<void> => {
+    const id = deletingConversationId.value
+    if (!id || deletingConversation.value) {
+      return
+    }
+    deletingConversation.value = true
+    try {
+      await deleteAiConversation(id)
+      conversations.value = conversations.value.filter((c) => c.conversationId !== id)
+      // 若删除的是当前活动对话，切回列表中的第一条
+      if (activeConversationId.value === id) {
+        activeConversationId.value = ''
+        messages.value = []
+        const next = conversations.value[0]
+        if (next) {
+          await selectConversation(next)
+        }
+      }
+      ElMessage.success('对话已删除')
+    } catch (error) {
+      ElMessage.error((error as Error).message || '删除失败')
+    } finally {
+      deletingConversation.value = false
+      closeDeleteDialog()
+    }
   }
 
   const scrollToBottom = (): void => {
@@ -351,13 +651,22 @@
   })
 
   /**
-   * 输入框自适应高度
+   * 输入框自适应高度：随内容增长，最小 56px，最大 160px，达到上限后出现滚动条
    */
+  const CHAT_INPUT_MIN_HEIGHT = 56
+  const CHAT_INPUT_MAX_HEIGHT = 160
+
   const resizeTextarea = (): void => {
     const el = inputRef.value
     if (!el) return
+    // 先重置高度，避免干扰 scrollHeight 测量
     el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+    // 强制 reflow，确保 scrollHeight 反映完整内容高度
+    void el.scrollHeight
+    const next = Math.min(Math.max(el.scrollHeight, CHAT_INPUT_MIN_HEIGHT), CHAT_INPUT_MAX_HEIGHT)
+    el.style.height = `${next}px`
+    // 未达到上限时隐藏滚动条，达到上限后启用滚动
+    el.style.overflowY = next >= CHAT_INPUT_MAX_HEIGHT ? 'auto' : 'hidden'
   }
 
   /**
@@ -432,6 +741,8 @@
    * 选择对话并加载其消息
    */
   const selectConversation = async (item: LocalConversation): Promise<void> => {
+    closeMenu()
+    hoverConversationId.value = null
     if (item.conversationId === activeConversationId.value) {
       return
     }
@@ -489,6 +800,20 @@
   }
 
   /**
+   * 加载可选知识库列表
+   */
+  const loadKnowledgeBases = async (): Promise<void> => {
+    kbLoading.value = true
+    try {
+      kbOptions.value = await fetchAiKnowledgeBases()
+    } catch {
+      kbOptions.value = []
+    } finally {
+      kbLoading.value = false
+    }
+  }
+
+  /**
    * 发送消息
    */
   const sendMessage = async (): Promise<void> => {
@@ -528,7 +853,7 @@
 
     try {
       await streamAiChat(
-        { chatId, question: text },
+        { chatId, question: text, kbId: selectedKbId.value },
         {
           onMessage: (chunk: string) => {
             // 打字机效果：增量追加内容并实时渲染
@@ -610,7 +935,7 @@
       resizeTextarea()
       scrollToBottom()
     })
-    await loadConversations()
+    await Promise.all([loadConversations(), loadKnowledgeBases()])
     // 无活动对话时自动选中最近一条对话
     if (!activeConversationId.value && conversations.value.length > 0) {
       await selectConversation(conversations.value[0])
@@ -618,7 +943,32 @@
   }
 
   const closeChat = (): void => {
+    closeMenu()
     isDrawerVisible.value = false
+  }
+
+  /**
+   * 点击任意位置关闭对话操作菜单（排除菜单本身）
+   */
+  const closeMenuOnDocumentClick = (e: MouseEvent): void => {
+    if (!menuVisible.value) return
+    const target = e.target as HTMLElement
+    if (!target.closest('.conv-menu') && !target.closest('.conv-more-btn')) {
+      closeMenu()
+    }
+  }
+
+  /**
+   * 点击重命名输入框以外的任意位置时，等同于失焦：确认并退出重命名。
+   * 使用 mousedown，保证即便输入框未获得焦点，点击空白也能直接退出输入状态。
+   * （与输入框 blur 行为一致，都会触发重命名接口）
+   */
+  const confirmRenameOnDocumentMousedown = (e: MouseEvent): void => {
+    if (!renamingId.value) return
+    const target = e.target as HTMLElement
+    if (!target.closest('.conv-rename-input') && renamingItem.value) {
+      confirmRename(renamingItem.value)
+    }
   }
 
   // 抽屉打开时锁定页面滚动
@@ -632,11 +982,15 @@
   onMounted(() => {
     mittBus.on('openChat', openChat)
     window.addEventListener('keydown', handleEscKeydown)
+    document.addEventListener('click', closeMenuOnDocumentClick)
+    document.addEventListener('mousedown', confirmRenameOnDocumentMousedown)
   })
 
   onUnmounted(() => {
     mittBus.off('openChat', openChat)
     window.removeEventListener('keydown', handleEscKeydown)
+    document.removeEventListener('click', closeMenuOnDocumentClick)
+    document.removeEventListener('mousedown', confirmRenameOnDocumentMousedown)
     document.body.style.overflow = ''
   })
 </script>
@@ -758,6 +1112,234 @@
 
     &.active .conv-item-icon {
       color: var(--theme-color);
+    }
+
+    .conv-item-name {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+  }
+
+  /* 分组标题 */
+  .conv-group {
+    margin-bottom: 4px;
+  }
+
+  .conv-group-label {
+    padding: 8px 10px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--art-gray-400);
+  }
+
+  /* 更多按钮与菜单 */
+  .conv-more {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+
+    &.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .conv-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    color: var(--art-gray-500);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease;
+
+    &:hover {
+      color: var(--theme-color);
+      background: color-mix(in srgb, var(--theme-color) 10%, transparent);
+    }
+  }
+
+  .conv-more-icon {
+    font-size: 18px;
+  }
+
+  .conv-menu {
+    position: fixed;
+    z-index: 3400;
+    min-width: 140px;
+    padding: 5px;
+    background: color-mix(in srgb, var(--default-box-color) 98%, transparent);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--art-card-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+  }
+
+  .conv-menu-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--art-gray-700);
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    transition:
+      color 0.12s ease,
+      background 0.12s ease;
+
+    .conv-menu-icon {
+      font-size: 15px;
+      color: var(--art-gray-500);
+      transition: color 0.12s ease;
+    }
+
+    &:hover {
+      color: var(--theme-color);
+      background: color-mix(in srgb, var(--theme-color) 9%, transparent);
+
+      .conv-menu-icon {
+        color: var(--theme-color);
+      }
+    }
+
+    &.danger:hover {
+      color: var(--color-danger, #f56c6c);
+      background: color-mix(in srgb, var(--color-danger, #f56c6c) 9%, transparent);
+
+      .conv-menu-icon {
+        color: var(--color-danger, #f56c6c);
+      }
+    }
+  }
+
+  /* 菜单过渡动画 */
+  .conv-menu-enter-active,
+  .conv-menu-leave-active {
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
+    transform-origin: top left;
+  }
+
+  .conv-menu-enter-from,
+  .conv-menu-leave-to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+
+  /* 重命名输入框 */
+  .conv-rename-input {
+    width: 100%;
+    min-width: 0;
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--art-gray-900);
+    background: color-mix(in srgb, var(--default-box-color) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--theme-color) 55%, transparent);
+    border-radius: 8px;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 14%, transparent);
+  }
+
+  /* 删除确认弹框 */
+  .delete-dialog {
+    position: relative;
+    z-index: 10;
+    width: min(360px, calc(100vw - 48px));
+    padding: 28px 24px 22px;
+    text-align: center;
+    background: color-mix(in srgb, var(--default-box-color) 97%, transparent);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--art-card-border);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+  }
+
+  .delete-dialog-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    background: color-mix(in srgb, var(--color-danger, #f56c6c) 10%, transparent);
+    border-radius: 50%;
+  }
+
+  .delete-dialog-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--art-gray-900);
+  }
+
+  .delete-dialog-desc {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--art-gray-600);
+  }
+
+  .delete-dialog-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .delete-dialog-btn {
+    flex: 1;
+    height: 38px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 12px;
+    transition:
+      opacity 0.15s ease,
+      transform 0.12s ease,
+      background 0.15s ease;
+
+    &.cancel {
+      color: var(--art-gray-700);
+      background: var(--art-hover-color);
+      border: 1px solid var(--art-card-border);
+
+      &:hover {
+        background: color-mix(in srgb, var(--art-gray-400) 25%, transparent);
+      }
+    }
+
+    &.danger {
+      color: #fff;
+      background: var(--color-danger, #f56c6c);
+      border: 1px solid var(--color-danger, #f56c6c);
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-danger, #f56c6c) 88%, #000);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    &:active {
+      transform: scale(0.98);
     }
   }
 
@@ -911,9 +1493,9 @@
   /* ==================== 输入区 ==================== */
   .input-shell {
     display: flex;
+    flex-direction: column;
     gap: 8px;
-    align-items: flex-end;
-    padding: 10px 10px 10px 16px;
+    padding: 14px 14px 12px 18px;
     background: color-mix(in srgb, var(--default-box-color) 80%, transparent);
     border: 1px solid var(--art-card-border);
     border-radius: 18px;
@@ -928,16 +1510,25 @@
     }
   }
 
+  /* 输入区底栏：知识库选择在左，发送按钮在右下 */
+  .input-footer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+  }
+
   .chat-textarea {
-    flex: 1;
-    min-height: 22px;
+    min-height: 56px;
     max-height: 160px;
-    padding: 4px 0;
+    padding: 6px 0;
     font-family: inherit;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: 15px;
+    line-height: 24px;
     color: var(--art-gray-900);
     resize: none;
+    overflow-y: auto;
     background: transparent;
     border: none;
     outline: none;

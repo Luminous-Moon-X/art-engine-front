@@ -4,6 +4,7 @@
 
 import request from '@/utils/http'
 import { useUserStore } from '@/store/modules/user'
+import { fetchKnowledgeBasePage } from '@/api/knowledge-base'
 import type {
   AiChatDoneEvent,
   AiChatErrorEvent,
@@ -47,8 +48,40 @@ export interface ChatStreamCallbacks {
  * - event: done —— data为对话信息（对话ID、对话名称、轮次数）
  * - event: error —— data为错误信息
  */
+
+/**
+ * 获取所有可选知识库（用于AI聊天选择知识库，label为kb_name、value为id）
+ */
+export async function fetchAiKnowledgeBases(): Promise<{ value: number; label: string }[]> {
+  const res = await fetchKnowledgeBasePage({ pageNumber: 1, pageSize: 999 })
+  return (res?.records || []).map((item) => ({ value: item.id, label: item.kbName }))
+}
+/**
+ * 重命名对话
+ *
+ * @param conversationId 对话ID
+ * @param newName        新对话名称
+ */
+export function renameAiConversation(conversationId: string, newName: string) {
+  return request.put<boolean>({
+    url: '/api/ai/conversations/rename',
+    data: { conversationId, newName }
+  })
+}
+
+/**
+ * 删除对话（连同其下全部消息，不可恢复）
+ *
+ * @param conversationId 对话ID
+ */
+export function deleteAiConversation(conversationId: string) {
+  return request.del<boolean>({
+    url: `/api/ai/conversations/${encodeURIComponent(conversationId)}`
+  })
+}
+
 export async function streamAiChat(
-  payload: { chatId: string; question: string },
+  payload: { chatId: string; question: string; kbId?: number | null },
   callbacks: ChatStreamCallbacks,
   signal?: AbortSignal
 ): Promise<void> {

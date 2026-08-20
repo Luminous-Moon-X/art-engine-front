@@ -49,10 +49,14 @@
               <h3 class="truncate text-base font-medium text-g-800">{{ item.kbName }}</h3>
               <div class="flex shrink-0 items-center gap-1" @click.stop>
                 <ElButton link type="primary" size="small" @click="openEdit(item)">编辑</ElButton>
-                <ElButton link type="danger" size="small" @click="handleDelete(item)">删除</ElButton>
+                <ElButton link type="danger" size="small" @click="handleDelete(item)"
+                  >删除</ElButton
+                >
               </div>
             </div>
-            <p class="mt-1 line-clamp-2 min-h-10 text-sm text-g-500">{{ item.kbDesc || '暂无描述' }}</p>
+            <p class="mt-1 line-clamp-2 min-h-10 text-sm text-g-500">{{
+              item.kbDesc || '暂无描述'
+            }}</p>
             <p class="mt-2 text-xs text-g-400">{{ item.createTime || '' }}</p>
           </div>
         </div>
@@ -83,7 +87,12 @@
     >
       <ElForm ref="formRef" :model="form" :rules="rules" label-width="100px" class="kb-edit-form">
         <ElFormItem label="知识库名称" prop="kbName">
-          <ElInput v-model="form.kbName" maxlength="100" show-word-limit placeholder="请输入知识库名称" />
+          <ElInput
+            v-model="form.kbName"
+            maxlength="100"
+            show-word-limit
+            placeholder="请输入知识库名称"
+          />
         </ElFormItem>
         <ElFormItem label="知识库描述" prop="kbDesc">
           <ElInput
@@ -113,11 +122,7 @@
               v-if="coverLoaded(form.coverOssFileId)"
               class="mt-3 h-40 w-64 overflow-hidden rounded-md border border-g-200 bg-gray-100"
             >
-              <ElImage
-                class="h-full w-full"
-                :src="coverLoaded(form.coverOssFileId)"
-                fit="cover"
-              />
+              <ElImage class="h-full w-full" :src="coverLoaded(form.coverOssFileId)" fit="cover" />
             </div>
             <div
               v-else-if="coverLoading(form.coverOssFileId)"
@@ -137,12 +142,7 @@
     </ElDialog>
 
     <!-- 文档管理抽屉 -->
-    <ElDrawer
-      v-model="drawerVisible"
-      class="art-kb-drawer"
-      size="85%"
-      :destroy-on-close="true"
-    >
+    <ElDrawer v-model="drawerVisible" class="art-kb-drawer" size="85%" :destroy-on-close="true">
       <template #header>
         <div>
           <p class="text-base font-medium">文档管理</p>
@@ -156,7 +156,12 @@
 </template>
 
 <script setup lang="ts">
-  import { fetchKnowledgeBasePage, addKnowledgeBase, editKnowledgeBase, deleteKnowledgeBase } from '@/api/knowledge-base'
+  import {
+    fetchKnowledgeBasePage,
+    addKnowledgeBase,
+    editKnowledgeBase,
+    deleteKnowledgeBase
+  } from '@/api/knowledge-base'
   import { uploadOssFile, downloadOssFile } from '@/api/oss'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { Plus, Loading } from '@element-plus/icons-vue'
@@ -186,7 +191,9 @@
   const pageSize = ref(12)
 
   /** 封面文件ID -> 加载状态与临时预览地址（通过后端下载接口获取） */
-  const coverMap = reactive<Record<number, { status: 'loading' | 'success' | 'error'; url?: string }>>({})
+  const coverMap = reactive<
+    Record<number, { status: 'loading' | 'success' | 'error'; url?: string }>
+  >({})
 
   /** 封面是否已加载成功，返回可展示的预览地址（空串表示未加载成功） */
   const coverLoaded = (id?: number | null): string => {
@@ -347,15 +354,11 @@
   }
 
   const handleDelete = (item: KnowledgeBaseRowItem) => {
-    ElMessageBox.confirm(
-      `确定删除知识库"${item.kbName}"吗？此操作不可恢复！`,
-      '删除确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
+    ElMessageBox.confirm(`确定删除知识库"${item.kbName}"吗？此操作不可恢复！`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
       .then(() => {
         deleteKnowledgeBase([item.id]).then((res) => {
           if (res) {
