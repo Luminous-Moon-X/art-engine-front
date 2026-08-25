@@ -130,12 +130,12 @@
         {
           prop: 'nickName',
           label: '用户昵称',
-          width: 130
+          width: 200
         },
         {
           prop: 'description',
           label: '操作描述',
-          width: 170
+          width: 240
         },
         {
           prop: 'requestUrl',
