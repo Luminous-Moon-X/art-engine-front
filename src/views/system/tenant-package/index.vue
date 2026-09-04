@@ -1,4 +1,4 @@
-<!-- 角色管理页面 -->
+<!-- 租户套餐管理页面 -->
 <template>
   <div class="art-full-height">
     <!-- 搜索区域 -->
@@ -16,7 +16,7 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton @click="showDialog('add')" v-ripple>新增角色</ElButton>
+            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增套餐</ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -27,17 +27,18 @@
         :data="data"
         :columns="columns"
         :pagination="pagination"
+        rowKey="id"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
       </ArtTable>
     </ElCard>
 
-    <!-- 角色编辑弹窗 -->
-    <RoleEditDialog
+    <!-- 套餐编辑弹窗 -->
+    <TenantPackageDialog
       v-model="dialogVisible"
       :dialog-type="dialogType"
-      :role-data="currentRoleData"
+      :package-data="currentPackageData"
       @success="refreshData"
     />
   </div>
@@ -45,38 +46,30 @@
 
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetRoleList, delRole } from '@/api/role'
-  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
-  import RoleEditDialog from './modules/role-edit-dialog.vue'
-  import { ElTag, ElMessageBox } from 'element-plus'
+  import { fetchTenantPackagePage, deleteTenantPackage } from '@/api/tenant-package'
+  import { ElTag, ElMessageBox, ElButton } from 'element-plus'
+  import TenantPackageDialog from './modules/tenant-package-dialog.vue'
 
-  defineOptions({ name: 'Role' })
+  type TenantPackageListItem = Api.Tenant.TenantPackageListItem
 
-  type RoleListItem = Api.SystemManage.RoleListItem
+  defineOptions({ name: 'TenantPackage' })
 
   // --- 搜索相关 ---
   const searchFormState = ref({
-    roleName: '',
-    roleCode: ''
+    packageName: ''
   })
 
   const searchItems = computed(() => [
     {
-      key: 'roleName',
-      label: '角色名称',
+      key: 'packageName',
+      label: '套餐名称',
       type: 'input',
-      props: { placeholder: '请输入角色名称' }
-    },
-    {
-      key: 'roleCode',
-      label: '角色编码',
-      type: 'input',
-      props: { placeholder: '请输入角色编码' }
+      props: { placeholder: '请输入套餐名称' }
     }
   ])
 
   const dialogVisible = ref(false)
-  const currentRoleData = ref<RoleListItem | undefined>(undefined)
+  const currentPackageData = ref<TenantPackageListItem | undefined>(undefined)
 
   // 表格相关
   const {
@@ -92,42 +85,42 @@
     handleCurrentChange,
     refreshData
   } = useTable({
-    // 核心配置
     core: {
-      apiFn: fetchGetRoleList,
+      apiFn: fetchTenantPackagePage,
       apiParams: {
         pageNumber: 1,
         pageSize: 20
       },
-      // 排除 apiParams 中的属性
       excludeParams: ['daterange'],
       columnsFactory: () => [
         {
-          prop: 'roleId',
-          label: '角色ID',
+          prop: 'id',
+          label: '套餐ID',
           visible: false
         },
         {
-          prop: 'roleName',
-          label: '角色名称',
-          width: 300
+          prop: 'packageName',
+          label: '套餐名称',
+          minWidth: 200
         },
         {
-          prop: 'roleCode',
-          label: '角色编码',
-          width: 250
+          prop: 'menuCount',
+          label: '菜单数量',
+          width: 110,
+          formatter: (row: TenantPackageListItem) => (row.menuCount ?? 0) + ' 项'
         },
         {
-          prop: 'roleDescription',
-          label: '角色描述',
-          minWidth: 150,
-          showOverflowTooltip: true
+          prop: 'remark',
+          label: '备注',
+          minWidth: 160,
+          showOverflowTooltip: true,
+          formatter: (row: TenantPackageListItem) => row.remark || '-'
         },
         {
-          prop: 'enable_flag',
+          prop: 'enableFlag',
           label: '是否启用',
-          width: 140,
-          formatter: (row) => {
+          width: 110,
+          formatter: (row: TenantPackageListItem) => {
             const statusConfig =
               row.enableFlag === 1
                 ? { type: 'success', text: '启用' }
@@ -141,25 +134,35 @@
         },
         {
           prop: 'createTime',
-          label: '创建日期',
-          width: 380,
-          sortable: true
+          label: '创建时间',
+          width: 175
         },
         {
           prop: 'operation',
           label: '操作',
-          width: 120,
+          width: 130,
           fixed: 'right',
-          formatter: (row) =>
-            h('div', { style: 'text-align: right' }, [
-              h(ArtButtonTable, {
-                type: 'edit',
-                onClick: () => handleEdit(row)
-              }),
-              h(ArtButtonTable, {
-                type: 'delete',
-                onClick: () => handleDelete(row)
-              })
+          align: 'center',
+          formatter: (row: TenantPackageListItem) =>
+            h('div', { style: 'display: flex; gap: 8px; justify-content: flex-end;' }, [
+              h(
+                ElButton,
+                {
+                  type: 'primary',
+                  link: true,
+                  onClick: () => handleEdit(row)
+                },
+                () => '编辑'
+              ),
+              h(
+                ElButton,
+                {
+                  type: 'danger',
+                  link: true,
+                  onClick: () => handleDelete(row)
+                },
+                () => '删除'
+              )
             ])
         }
       ]
@@ -170,17 +173,16 @@
   const dialogType = ref<'add' | 'edit'>('add')
 
   // 打开新增/修改弹窗
-  const showDialog = (type: 'add' | 'edit', row?: RoleListItem) => {
+  const showDialog = (type: 'add' | 'edit', row?: TenantPackageListItem) => {
     dialogVisible.value = true
     dialogType.value = type
-    currentRoleData.value = row
+    currentPackageData.value = row
   }
 
   /**
    * 搜索处理
    */
   const handleSearch = () => {
-    // 搜索参数赋值
     Object.assign(searchParams, searchFormState.value)
     getData()
   }
@@ -190,20 +192,20 @@
     resetSearchParams()
   }
 
-  // 编辑角色
-  const handleEdit = (row: RoleListItem) => {
+  // 编辑套餐
+  const handleEdit = (row: TenantPackageListItem) => {
     showDialog('edit', row)
   }
 
-  // 删除角色
-  const handleDelete = (row: RoleListItem) => {
-    ElMessageBox.confirm(`确定删除角色"${row.roleName}"吗？此操作不可恢复！`, '删除确认', {
+  // 删除套餐
+  const handleDelete = (row: TenantPackageListItem) => {
+    ElMessageBox.confirm(`确定删除套餐"${row.packageName}"吗？此操作不可恢复！`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
       .then(() => {
-        delRole(row.id as number).then((res) => {
+        deleteTenantPackage(row.id).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
             refreshData()

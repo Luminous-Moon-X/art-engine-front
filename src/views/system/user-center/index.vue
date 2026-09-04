@@ -170,7 +170,7 @@
    */
   const form = reactive<UserRowItem>({
     id: undefined,
-    enableFlag: true,
+    enableFlag: 1,
     userName: '',
     nickName: '',
     password: '',

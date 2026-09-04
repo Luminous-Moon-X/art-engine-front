@@ -194,9 +194,10 @@
           label: '是否启用',
           width: 130,
           formatter: (row: UserRowItem) => {
-            const statusConfig = row.enableFlag
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
+            const statusConfig =
+              row.enableFlag === 1
+                ? { type: 'success', text: '启用' }
+                : { type: 'warning', text: '禁用' }
             return h(
               ElTag,
               { type: statusConfig.type as 'success' | 'warning' },
@@ -326,10 +327,17 @@
     children: 'children',
     label: 'label'
   }
-  // 树节点点击事件
+  // 树节点点击事件（再次点击已选中的节点取消选中）
   const handleNodeClick = (data: DeptOptionItem) => {
-    searchFormState.value.deptId = data.value
-    currentNodeKey.value = data.value
+    if (currentNodeKey.value === data.value) {
+      // 再次点击已选中的节点，取消选中并清空部门筛选
+      currentNodeKey.value = undefined
+      treeRef.value?.setCurrentKey(null)
+      searchFormState.value.deptId = undefined
+    } else {
+      searchFormState.value.deptId = data.value
+      currentNodeKey.value = data.value
+    }
     handleSearch()
   }
   // 部门树数据

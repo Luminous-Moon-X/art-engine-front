@@ -42,6 +42,7 @@ import { setPageTitle } from '@/utils/router'
 import { resetRouterState } from '@/router/guards/beforeEach'
 import { useMenuStore } from './menu'
 import { fetchLogout } from '@/api/auth'
+import { fetchTenantConfig, switchTenant as switchTenantApi } from '@/api/tenant'
 import { ElNotification } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 
@@ -69,6 +70,13 @@ export const useUserStore = defineStore(
     const accessToken = ref('')
     // 刷新令牌
     const refreshToken = ref('')
+    // 多租户是否启用（通过租户公共配置接口获取，避免持久化陈旧值）
+    const tenantEnable = ref(false)
+    // 当前生效租户（来自用户信息接口）
+    const currentTenant = computed(() => ({
+      tenantId: info.value.tenantId,
+      tenantName: info.value.tenantName
+    }))
 
     // 计算属性：获取用户信息
     const getUserInfo = computed(() => info.value)
@@ -143,6 +151,39 @@ export const useUserStore = defineStore(
      * @returns 访问令牌
      */
     const getToken = () => accessToken.value
+
+    /**
+     * 加载多租户公共配置（登录页/租户切换器使用）
+     * 失败时按未启用多租户处理，不影响登录
+     */
+    const loadTenantConfig = async () => {
+      try {
+        const config = await fetchTenantConfig()
+        tenantEnable.value = config?.tenantEnable ?? false
+      } catch {
+        tenantEnable.value = false
+      }
+      return tenantEnable.value
+    }
+
+    /**
+     * 切换当前生效租户（超级管理员）
+     * 切换成功后重新加载用户信息与菜单（不退出登录）
+     * @param tenantId 目标租户ID
+     */
+    const switchTenant = async (tenantId: number) => {
+      const success = await switchTenantApi(tenantId)
+      if (!success) {
+        return false
+      }
+      // 清空当前租户数据并重置动态路由，触发重新拉取用户信息/菜单
+      info.value = {}
+      resetRouterState(300)
+      setTimeout(() => {
+        router.push({ path: '/' })
+      }, 350)
+      return true
+    }
 
     /**
      * 退出登录
@@ -227,10 +268,14 @@ export const useUserStore = defineStore(
       searchHistory,
       accessToken,
       refreshToken,
+      tenantEnable,
+      currentTenant,
       getUserInfo,
       getSettingState,
       getWorktabState,
       getToken,
+      loadTenantConfig,
+      switchTenant,
       setUserInfo,
       setLoginStatus,
       setLanguage,

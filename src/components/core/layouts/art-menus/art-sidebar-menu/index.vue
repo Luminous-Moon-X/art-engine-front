@@ -109,6 +109,9 @@
         </ElMenu>
       </ElScrollbar>
 
+      <!-- 底部租户切换器（超级管理员） -->
+      <ArtTenantSwitcher />
+
       <!-- 双列菜单右侧折叠按钮 -->
       <div class="dual-menu-collapse-btn" v-if="isDualMenu" @click="toggleMenuVisibility">
         <ArtSvgIcon
@@ -137,6 +140,7 @@
   import { isIframe } from '@/utils/navigation'
   import { handleMenuJump } from '@/utils/navigation'
   import SidebarSubmenu from './widget/SidebarSubmenu.vue'
+  import ArtTenantSwitcher from '@/components/core/layouts/art-tenant-switcher/index.vue'
   import { useCommon } from '@/hooks/core/useCommon'
   import { useWindowSize, useTimeoutFn } from '@vueuse/core'
 

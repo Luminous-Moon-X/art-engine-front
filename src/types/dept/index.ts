@@ -6,7 +6,7 @@ export interface DeptRowItem {
   deptName: string
   parentId: number | null
   orderNum: number
-  enableFlag: boolean
+  enableFlag: number
   chargePerson: string
   chargePersonTel: string
   chargePersonEmail: string

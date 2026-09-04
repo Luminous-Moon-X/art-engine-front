@@ -34,14 +34,12 @@
     ],
     "*.vue": [
       "eslint --fix",
-      "stylelint --fix --allow-empty-input",
       "prettier --write"
     ],
     "*.{html,htm}": [
       "prettier --write"
     ],
     "*.{scss,css,less}": [
-      "stylelint --fix --allow-empty-input",
       "prettier --write"
     ],
     "*.{md,mdx}": [

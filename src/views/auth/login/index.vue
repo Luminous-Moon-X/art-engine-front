@@ -15,19 +15,22 @@
             :model="formData"
             :rules="rules"
             :key="formKey"
+            :validate-on-rule-change="false"
             @keyup.enter="handleSubmit"
             style="margin-top: 25px"
           >
-            <ElFormItem prop="account" v-if="false">
-              <ElSelect v-model="formData.tenant" :placeholder="$t('login.placeholder.tenant')">
+            <ElFormItem prop="tenantId" v-if="tenantEnable">
+              <ElSelect
+                v-model="formData.tenantId"
+                class="custom-height w-full"
+                :placeholder="$t('login.placeholder.tenant')"
+              >
                 <ElOption
-                  v-for="account in accounts"
-                  :key="account.key"
-                  :label="account.label"
-                  :value="account.key"
-                >
-                  <span>{{ account.label }}</span>
-                </ElOption>
+                  v-for="item in tenantOptions"
+                  :key="item.id"
+                  :label="item.tenantName"
+                  :value="String(item.id)"
+                />
               </ElSelect>
             </ElFormItem>
             <ElFormItem prop="username">
@@ -155,6 +158,7 @@
   import { useI18n } from 'vue-i18n'
   import { HttpError } from '@/utils/http/error'
   import { fetchLogin, forceResetPassword } from '@/api/auth'
+  import { fetchTenantList } from '@/api/tenant'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
   import { useSettingStore } from '@/store/modules/setting'
   import CryptoJS from 'crypto-js'
@@ -171,39 +175,23 @@
     formKey.value++
   })
 
-  type AccountKey = 'tencent' | 'baidu' | 'alibaba'
-
-  export interface Account {
-    key: AccountKey
-    label: string
-    userName: string
-    password: string
-    roles: string[]
-  }
-
-  const accounts = computed<Account[]>(() => [
-    {
-      key: 'tencent',
-      label: t('login.tenant.tencent'),
-      userName: 'Super',
-      password: '123456',
-      roles: ['R_SUPER']
-    },
-    {
-      key: 'baidu',
-      label: t('login.tenant.baidu'),
-      userName: 'Admin',
-      password: '123456',
-      roles: ['R_ADMIN']
-    },
-    {
-      key: 'alibaba',
-      label: t('login.tenant.alibaba'),
-      userName: 'User',
-      password: '123456',
-      roles: ['R_USER']
+  // 多租户是否启用（由后端 art.tenant.enable 控制，启用时登录前需选择租户）
+  const tenantEnable = ref(false)
+  // 租户下拉选项
+  const tenantOptions = ref<Api.Tenant.TenantOptionItem[]>([])
+  // 加载多租户配置与租户列表
+  const loadTenants = async () => {
+    tenantEnable.value = await userStore.loadTenantConfig()
+    if (tenantEnable.value) {
+      const list = await fetchTenantList()
+      tenantOptions.value = list || []
+      // 默认选择第一个租户
+      if (tenantOptions.value.length > 0) {
+        formData.tenantId = String(tenantOptions.value[0].id)
+      }
     }
-  ])
+  }
+  onMounted(loadTenants)
 
   const dragVerify = ref()
 
@@ -216,15 +204,15 @@
   const formRef = ref<FormInstance>()
 
   const formData = reactive({
-    tenant: '',
+    tenantId: '',
     username: '',
     password: '',
     rememberPassword: true
   })
 
-  // 表单验证规则
+  // 表单验证规则（tenantId 仅在租户下拉框渲染时参与校验）
   const rules = computed<FormRules>(() => ({
-    tenant: [{ required: true, message: t('login.placeholder.tenant'), trigger: 'change' }],
+    tenantId: [{ required: true, message: t('login.placeholder.tenant'), trigger: 'change' }],
     username: [{ required: true, message: t('login.placeholder.username'), trigger: 'blur' }],
     password: [{ required: true, message: t('login.placeholder.password'), trigger: 'blur' }]
   }))
@@ -256,7 +244,8 @@
 
       const { token, forceChangePassword } = await fetchLogin({
         userName: username,
-        password: md5Password
+        password: md5Password,
+        tenantId: tenantEnable.value ? formData.tenantId : undefined
       })
 
       // 验证token
