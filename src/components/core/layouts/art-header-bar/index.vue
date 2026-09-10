@@ -129,7 +129,7 @@
           class="chat-button relative"
           @click="openChat"
         >
-          <div class="breathing-dot absolute top-2 right-2 size-1.5 !bg-success rounded-full"></div>
+          <!-- <div class="breathing-dot absolute top-2 right-2 size-1.5 !bg-success rounded-full"></div> -->
         </ArtIconButton>
 
         <!-- 设置按钮 -->
