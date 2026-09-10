@@ -56,7 +56,13 @@
           <template #header>
             <div class="flex items-center justify-between">
               <b>功能授权</b>
-              <ElButton v-ripple type="primary" @click="handleSave">保存</ElButton>
+              <ElButton
+                v-ripple
+                type="primary"
+                @click="handleSave"
+                v-auth="'system:menu-permission:edit'"
+                >保存</ElButton
+              >
             </div>
           </template>
           <ElScrollbar>

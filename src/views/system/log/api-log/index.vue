@@ -21,6 +21,7 @@
               :disabled="!selectedIds.length"
               @click="handleBatchDelete"
               v-ripple
+              v-auth="'system:api-log:delete'"
             >
               批量删除
             </ElButton>
@@ -49,7 +50,8 @@
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetApiLogList, delApiLog } from '@/api/log'
-  import { ElTag, ElMessageBox, ElButton } from 'element-plus'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { ElTag, ElMessageBox } from 'element-plus'
   import { ApiLogRowItem } from '@/types/log'
   import ApiLogDetailDialog from './modules/api-log-detail-dialog.vue'
 
@@ -185,25 +187,16 @@
           fixed: 'right',
           align: 'center',
           formatter: (row) =>
-            h('div', { style: 'display: flex; gap: 8px; justify-content: flex-end' }, [
-              h(
-                ElButton,
-                {
-                  type: 'primary',
-                  link: true,
-                  onClick: () => handleDetail(row)
-                },
-                () => '详情'
-              ),
-              h(
-                ElButton,
-                {
-                  type: 'danger',
-                  link: true,
-                  onClick: () => handleDelete(row)
-                },
-                () => '删除'
-              )
+            h('div', { style: 'text-align: right' }, [
+              h(ArtButtonTable, {
+                type: 'view',
+                onClick: () => handleDetail(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                auth: 'system:api-log:delete',
+                onClick: () => handleDelete(row)
+              })
             ])
         }
       ]
