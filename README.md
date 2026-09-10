@@ -1,104 +1,107 @@
-<img  src="https://www.qiniu.lingchen.kim/github-cover-light6.webp" />
+<div align="center">
+  <img src="./src/assets/images/common/logo-title.png" alt="Art Design Pro" width="420" />
+</div>
 
 <br />
-<h1 align="center">Art Engine</h1>
-<p align="center">A backend system template that combines design aesthetics with efficient development, helping you quickly build professional-grade applications</p>
+
+<p align="center">
+  The frontend admin console of the <b>Art Engine</b> platform,<br />
+  built with <b>Vue 3 · TypeScript · Vite · Element Plus · Tailwind CSS</b>.
+</p>
+
 <div align="center">English | <a href="./README.zh-CN.md">简体中文</a></div>
 
 <br />
+
 <div align="center">
 
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE) [![github stars](https://img.shields.io/github/stars/Daymychen/art-design-pro)](https://github.com/Daymychen/art-design-pro/stargazers) [![github forks](https://img.shields.io/github/forks/Daymychen/art-design-pro)](https://github.com/Daymychen/art-design-pro/network/members)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE) [![stars](https://img.shields.io/github/stars/Luminous-Moon-X/art-engine-front)](https://github.com/Luminous-Moon-X/art-engine-front/stargazers) [![forks](https://img.shields.io/github/forks/Luminous-Moon-X/art-engine-front)](https://github.com/Luminous-Moon-X/art-engine-front/network/members)
 
 </div>
+
 <br />
 
-## What makes this project special?
+## ✨ What makes this project special?
 
-**Interface Design**: Modern UI design with smooth interactions, focusing on user experience and visual design
+- **Beautiful and smooth** — a modern interface with polished interactions that feel like a commercial product
+- **Ready-to-use components** — tables, forms, search bars, charts, rich-text editors and more, so you can assemble business pages quickly
+- **Faster development** — common page patterns (lists, forms, charts…) are wrapped into easy-to-use building blocks
+- **Flexible theming** — light / dark / follow-system themes, custom primary colors, multiple menu layouts, page transitions, watermark, lock screen and more
+- **Multi-language** — Chinese and English are built in
+- **Two running modes** — connect to the real backend, or run on built-in mock data with no backend at all
+- **Clean start** — one command removes all demo data, leaving a clean base project
 
-**Quick Start**: Clean architecture + comprehensive documentation, easy for backend developers to use
+## 🖼️ Preview
 
-**Rich Components**: Built-in high-quality components for data display, forms, and more to meet different business scenarios
+<kbd><img src="./src/assets/images/common/light.png" alt="Light theme" /></kbd>
 
-**Smooth Interactions**: Button clicks, theme switching, page transitions, chart animations - experience comparable to commercial products
+<kbd><img src="./src/assets/images/common/dark.png" alt="Dark theme" /></kbd>
 
-**Efficient Development**: Built-in practical APIs like useTable and ArtForm to significantly improve development efficiency
+## 🛠️ Tech Stack
 
-**Clean Scripts**: Built-in one-click cleanup script to quickly remove demo data and get a ready-to-develop base project
+Vue 3 · TypeScript · Vite · Vue Router · Pinia · Element Plus · Tailwind CSS · Axios · ECharts · vue-i18n · xlsx · Mock.js
 
-## Tech Stack
+Code quality: ESLint · Prettier · Stylelint · Husky · lint-staged · commitizen (cz-git)
 
-Development Framework: Vue3, TypeScript, Vite, Element-Plus, Tailwind CSS
+## 🚀 Quick Start
 
-Code Standards: Eslint, Prettier, Stylelint, Husky, Lint-staged, cz-git
-
-## Preview
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c1.webp" alt="Light Theme"/></kbd>
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c2.webp" alt="Light Theme"/></kbd>
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c4.webp" alt="Dark Theme"/></kbd>
-
-<kbd><img src="https://www.qiniu.lingchen.kim/github-c5.webp" alt="Dark Theme"/></kbd>
-
-## Quick Access
-
-[Live Demo](https://www.artd.pro) | [Official Documentation](https://www.artd.pro/docs) | [Changelog](./CHANGELOG.en.md)
-
-## Installation & Setup
+**Requirements**: Node.js >= 20.19.0, pnpm >= 8.8.0
 
 ```bash
-# Install dependencies
+# install dependencies
 pnpm install
 
-# If pnpm install fails, try using the command below
+# if pnpm install fails, try:
 pnpm install --ignore-scripts
 
-# Start local development environment
+# start the dev server (default http://localhost:3006)
 pnpm dev
 
-# Build for production
+# type-check and build for production (output to dist/)
 pnpm build
+
+# preview the production build
+pnpm serve
 ```
 
-## Clean Version
+### Useful Scripts
 
-The project includes a cleanup script to quickly remove demo data and provide developers with a ready-to-develop base project
+| Command                  | Description                  |
+| ------------------------ | ---------------------------- |
+| `pnpm dev`               | Start the dev server         |
+| `pnpm build`             | Build for production         |
+| `pnpm serve`             | Preview the production build |
+| `pnpm lint` / `pnpm fix` | Code check / auto-fix        |
+| `pnpm lint:prettier`     | Format code                  |
+| `pnpm lint:stylelint`    | Fix styles                   |
+| `pnpm commit`            | Commit with commitizen       |
+| `pnpm clean:dev`         | Remove demo data             |
 
-```bash
-pnpm clean:dev
-```
+### Environment Variables
 
-## Technical Support
+Main options in `.env` / `.env.development` / `.env.production`:
 
-QQ Group: <a href="https://qm.qq.com/cgi-bin/qm/qr?k=Gg6yzZLFaNgmRhK0T5Qcjf7-XcAFWWXm&jump_from=webapi&authKey=YpRKVJQyFKYbGTiKw0GJ/YQXnNF+GdXNZC5beQQqnGZTvuLlXoMO7nw5fNXvmVhA">1038930070</a> (Click the link to join the group chat)
+| Variable             | Description                                    | Default                 |
+| -------------------- | ---------------------------------------------- | ----------------------- |
+| `VITE_PORT`          | Dev server port                                | `3006`                  |
+| `VITE_ACCESS_MODE`   | `backend` (real API) or `frontend` (mock data) | `backend`               |
+| `VITE_API_URL`       | API base path                                  | `/`                     |
+| `VITE_API_PROXY_URL` | Dev proxy target (backend address)             | `http://localhost:8080` |
+| `VITE_BASE_URL`      | Deployment base path                           | `/`                     |
 
-## Browser Compatibility
+## 🔌 Backend Integration
 
-Supports modern mainstream browsers including Chrome, Safari, Firefox, and more.
+This project is the frontend of the **Art Engine** platform. In `backend` mode (the default) requests go through `/api`, which is proxied to the backend during development:
 
-## Contributing
+- Dev: `VITE_API_PROXY_URL = http://localhost:8080` (Art Engine's default address)
+- Prod: set `VITE_API_URL` to the real backend address
 
-We sincerely welcome and appreciate the support of every contributor! Whether you have new ideas, feature suggestions, or code optimizations, you can participate in the following ways:
+See the [Art Engine](https://github.com/Luminous-Moon-X/art-engine) backend repository.
 
-Submit Pull Requests: Share your code and help the project grow.
+## 🌐 Browser Compatibility
 
-Create GitHub Issues: Provide bug feedback or new feature suggestions to help us improve together.
+Chrome, Edge, Firefox, Safari and other modern browsers.
 
-Every contribution you make takes this project one step further! Come join our open source community!
+## 📄 License
 
-## Continuous Optimization & Extension
-
-The project maintains active updates, supports the latest frontend tech stack, is compatible with mainstream frameworks, and ensures long-term stability and extensibility. Community-driven feedback mechanisms allow your needs to be quickly integrated into project iterations.
-
-## Donation
-
-If you feel this project has reduced your development costs and solved problems in your work/life, you can support us through the following ways:
-
-<img src="https://www.qiniu.lingchen.kim/%E7%BB%84%202%402x%202.png" alt="Donation QR Code"/>
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Daymychen/art-design-pro&type=Date)](https://www.star-history.com/#Daymychen/art-design-pro&Date)
+[MIT](./LICENSE)
