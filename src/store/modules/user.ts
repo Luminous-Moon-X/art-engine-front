@@ -224,8 +224,10 @@ export const useUserStore = defineStore(
       }
       // 通知其它标签页重新加载，避免其界面停留在旧租户
       broadcastTenantSwitch()
-      // 清空当前租户数据并重置动态路由，触发重新拉取用户信息/菜单
+      // 清空当前租户数据、已打开的工作标签页并重置动态路由，触发重新拉取用户信息/菜单。
+      // 工作标签页清空后，跳转首页时会由 setWorktab 自动重建首页标签（保留首页）
       info.value = {}
+      useWorktabStore().clearAll()
       resetRouterState(300)
       setTimeout(() => {
         router.push({ path: '/' })

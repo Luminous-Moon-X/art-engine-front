@@ -338,18 +338,63 @@
     })
   }
 
-  // 登录成功提示
-  const showLoginSuccessNotice = () => {
-    setTimeout(() => {
-      ElNotification({
-        title: t('login.success.title'),
-        type: 'success',
-        duration: 2500,
-        zIndex: 10000,
-        message: `${t('login.success.message')}, ${userStore.getUserInfo.userName}!`
-      })
-    }, 1000)
+  // 欢迎通知是否已弹出（防止重复弹出）
+  let welcomeNoticeShown = false
+  // 等待用户信息就绪的定时器（超时后用通用文案兜底）
+  let welcomeNoticeTimer: ReturnType<typeof setTimeout> | null = null
+
+  // 弹出欢迎通知
+  const showWelcomeNotice = (userName?: string) => {
+    if (welcomeNoticeShown) return
+    welcomeNoticeShown = true
+    ElNotification({
+      title: t('login.success.title'),
+      type: 'success',
+      duration: 2500,
+      zIndex: 10000,
+      message: userName
+        ? `${t('login.success.message')}, ${userName}!`
+        : `${t('login.success.message')}!`
+    })
   }
+
+  // 登录成功提示：
+  // 登录接口不返回用户名，用户信息由路由守卫通过 /api/user/info 异步拉取后写入 store，
+  // 因此等待用户信息就绪后再弹出（避免出现 "欢迎回来, undefined!"）；
+  // 若超时仍未就绪（网络慢/接口异常），用不含用户名的通用文案兜底。
+  const showLoginSuccessNotice = () => {
+    const userName = userStore.getUserInfo.userName
+    if (userName) {
+      showWelcomeNotice(userName)
+      return
+    }
+    // 用户信息尚未就绪，等待守卫侧 fetchUserInfo -> setUserInfo 写入
+    welcomeNoticeTimer = setTimeout(() => {
+      welcomeNoticeTimer = null
+      // 超时兜底：用通用文案弹出
+      showWelcomeNotice()
+    }, 3000)
+  }
+
+  // 用户信息就绪后立即弹出欢迎通知
+  watch(
+    () => userStore.getUserInfo.userName,
+    (userName) => {
+      if (welcomeNoticeTimer && !welcomeNoticeShown && userName) {
+        clearTimeout(welcomeNoticeTimer)
+        welcomeNoticeTimer = null
+        showWelcomeNotice(userName)
+      }
+    }
+  )
+
+  // 组件卸载时清理等待定时器
+  onUnmounted(() => {
+    if (welcomeNoticeTimer) {
+      clearTimeout(welcomeNoticeTimer)
+      welcomeNoticeTimer = null
+    }
+  })
 </script>
 
 <style scoped>

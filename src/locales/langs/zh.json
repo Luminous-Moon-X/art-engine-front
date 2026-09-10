@@ -18,6 +18,10 @@
     "search": {
       "title": "搜索"
     },
+    "tenant": {
+      "label": "租户",
+      "switchSuccess": "租户切换成功"
+    },
     "user": {
       "userCenter": "个人中心",
       "docs": "使用文档",

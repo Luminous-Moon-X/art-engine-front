@@ -18,6 +18,10 @@
     "search": {
       "title": "Search"
     },
+    "tenant": {
+      "label": "Tenant",
+      "switchSuccess": "Tenant switched successfully"
+    },
     "user": {
       "userCenter": "User center",
       "docs": "Document",
