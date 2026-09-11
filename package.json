@@ -17,7 +17,10 @@
     "lint:lint-staged": "lint-staged",
     "prepare": "husky",
     "commit": "git-cz",
-    "clean:dev": "tsx scripts/clean-dev.ts"
+    "clean:dev": "tsx scripts/clean-dev.ts",
+    "docs:dev": "vitepress dev docs --port 8086",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs --port 8086"
   },
   "config": {
     "commitizen": {
@@ -119,6 +122,7 @@
     "vite": "^7.1.5",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vue-devtools": "^7.7.6",
+    "vitepress": "2.0.0-alpha.20",
     "vue-demi": "^0.14.9",
     "vue-img-cutter": "^3.0.5",
     "vue-tsc": "~2.1.6"

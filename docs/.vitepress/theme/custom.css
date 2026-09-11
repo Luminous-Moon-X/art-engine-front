@@ -1,0 +1,47 @@
+/**
+ * 首页 Hero 右侧 Logo。
+ *
+ * 默认主题把 hero image 限制在 20rem（`.image-src` 的 max-width / max-height），
+ * 这里用一个变量统一放大，日常只需要改下面这一个值即可。
+ */
+:root {
+  --art-hero-logo-size: 14rem;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --art-hero-logo-size: 20rem;
+  }
+}
+
+@media (min-width: 60rem) {
+  :root {
+    --art-hero-logo-size: 28rem;
+  }
+}
+
+/* Logo 本体：默认主题上限是 20rem，这里放宽（选择器比默认主题多一层，确保覆盖生效） */
+.VPHero .image .image-container .image-src {
+  max-width: var(--art-hero-logo-size);
+  max-height: var(--art-hero-logo-size);
+}
+
+/*
+ * 背光光晕同步缩放。
+ * 默认主题的 --vp-home-hero-image-background-image 为 none（即默认无光晕），
+ * 如需彩色光晕，可在 :root 中设置：
+ *   --vp-home-hero-image-background-image: linear-gradient(-45deg, #6750a4 50%, #a78bfa 50%);
+ *   --vp-home-hero-image-filter: blur(56px);
+ */
+.VPHero .image .image-container .image-bg {
+  width: calc(var(--art-hero-logo-size) * 0.72);
+  height: calc(var(--art-hero-logo-size) * 0.72);
+}
+
+/* 窄屏下容器是固定尺寸，需要一起调整，避免 Logo 溢出压到文字 */
+@media (max-width: 59.99rem) {
+  .VPHero .image .image-container {
+    width: var(--art-hero-logo-size);
+    height: var(--art-hero-logo-size);
+  }
+}
