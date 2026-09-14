@@ -8,7 +8,7 @@ hero:
   tagline: Beautiful, Elegant, Safe, Fast, and AI-Integrated
   # Large logo to the right of the title / tagline; size is set in docs/.vitepress/theme/custom.css
   image:
-    src: /logo.svg
+    src: /logo-big.png
     alt: Art Engine
   actions:
     - theme: brand
@@ -19,10 +19,10 @@ hero:
       link: /en/guide/quick-start
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Latest Mainstream Tech Stack
+    details: Built on Java 21, Spring Boot 3.x, Vue 3, TypeScript and other modern mainstream technologies
+  - title: Genuinely Fast
+    details: A uniquely designed two-level cache mechanism automatically loads frequently used data into two levels of cache when the service starts, guaranteeing excellent speed and data safety
+  - title: Beautiful Interface
+    details: Combining design aesthetics with efficient development, it provides theme colors, layout modes, dark mode, and system configuration examples
 ---
