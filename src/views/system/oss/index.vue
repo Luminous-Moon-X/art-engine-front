@@ -12,7 +12,13 @@
     <ElCard class="art-table-card" shadow="never">
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
-          <ElButton type="primary" @click="showDialog('add')" v-ripple>新增配置</ElButton>
+          <ElButton
+            type="primary"
+            @click="showDialog('add')"
+            v-ripple
+            v-auth="'system:oss-config:add'"
+            >新增配置</ElButton
+          >
         </template>
       </ArtTableHeader>
 
@@ -39,7 +45,8 @@
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
   import { fetchOssConfigPage, deleteOssConfig, enableOssConfig } from '@/api/oss'
-  import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
   import { OssConfigRowItem } from '@/types/oss'
   import type { VNode } from 'vue'
   import OssEditDialog from './modules/oss-edit-dialog.vue'
@@ -148,33 +155,34 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 230,
+          width: 170,
           fixed: 'right',
           align: 'center',
           formatter: (row: OssConfigRowItem) => {
             const buttons: VNode[] = []
             if (row.enableFlag !== 1) {
               buttons.push(
-                h(
-                  ElButton,
-                  { type: 'success', link: true, size: 'small', onClick: () => handleEnable(row) },
-                  () => '启用'
-                )
+                h(ArtButtonTable, {
+                  icon: 'ri:play-circle-line',
+                  iconClass: 'bg-success/12 text-success',
+                  auth: 'system:oss-config:enable',
+                  onClick: () => handleEnable(row)
+                })
               )
             }
             buttons.push(
-              h(
-                ElButton,
-                { type: 'primary', link: true, size: 'small', onClick: () => handleEdit(row) },
-                () => '编辑'
-              ),
-              h(
-                ElButton,
-                { type: 'danger', link: true, size: 'small', onClick: () => handleDelete(row) },
-                () => '删除'
-              )
+              h(ArtButtonTable, {
+                type: 'edit',
+                auth: 'system:oss-config:edit',
+                onClick: () => handleEdit(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                auth: 'system:oss-config:delete',
+                onClick: () => handleDelete(row)
+              })
             )
-            return h('div', { class: 'flex justify-center gap-1' }, buttons)
+            return h('div', { class: 'flex justify-center' }, buttons)
           }
         }
       ]

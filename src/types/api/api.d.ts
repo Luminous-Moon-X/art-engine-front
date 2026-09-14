@@ -66,6 +66,8 @@ declare namespace Api {
     interface LoginParams {
       userName: string
       password: string
+      /** 租户ID（多租户开启时必填） */
+      tenantId?: string
     }
 
     /** 修改密码参数 */
@@ -98,6 +100,14 @@ declare namespace Api {
       email: string
       avatar?: string
       userType: string
+      /**
+       * 当前生效租户ID
+       */
+      tenantId?: number
+      /**
+       * 当前生效租户名称
+       */
+      tenantName?: string
     }
   }
 
@@ -139,7 +149,7 @@ declare namespace Api {
       roleCode: string
       roleDescription: string
       createTime: string
-      enableFlag: boolean
+      enableFlag: number
     }
     /** 角色选项项 */
     interface RoleOptionItem {
@@ -156,16 +166,34 @@ declare namespace Api {
 
   /** 租户管理类型 */
   namespace Tenant {
+    /** 多租户公共配置 */
+    interface TenantConfig {
+      /** 是否启用多租户 */
+      tenantEnable: boolean
+      /** 默认租户ID */
+      defaultTenantId: number
+    }
+
     /** 租户列表项 */
     interface TenantListItem {
       id: number
+      /** 租户编码 */
+      tenantCode: string
+      /** 租户名称 */
       tenantName: string
-      expireDate: string
-      enableFlag: boolean
+      /** 租户套餐ID */
+      packageId: number
+      /** 租户套餐名称 */
+      packageName: string
+      /** 租户管理员用户名 */
+      adminUsername: string
+      /** 启用状态 1-启用 0-禁用 */
+      enableFlag: number
+      /** 到期时间 */
+      expireDate: string | null
+      /** 备注 */
+      remark: string
       createTime: string
-      description: string
-      adminName: string
-      adminAccount: string
     }
 
     /** 租户列表 */
@@ -173,23 +201,69 @@ declare namespace Api {
 
     /** 租户搜索参数 */
     interface TenantSearchParams extends Api.Common.CommonSearchParams {
-      name?: string
-      status?: boolean
-      expireDate?: string
+      tenantName?: string
+      tenantCode?: string
+      packageId?: number
     }
 
     /** 创建租户参数 */
     interface CreateTenantParams {
-      name: string
-      expireDate: string
-      status: boolean
-      adminAccount: string
-      adminPassword?: string
-      description?: string
+      tenantCode: string
+      tenantName: string
+      /** 租户套餐ID */
+      packageId: number
+      enableFlag: number
+      expireDate?: string
+      remark?: string
+      /** 租户管理员用户名（同时创建该用户） */
+      adminUsername: string
     }
 
     /** 更新租户参数 */
     interface UpdateTenantParams extends Partial<CreateTenantParams> {
+      id: number
+    }
+
+    /** 登录/切换租户下拉选项 */
+    interface TenantOptionItem {
+      id: number
+      tenantCode: string
+      tenantName: string
+    }
+
+    /** 租户套餐列表项 */
+    interface TenantPackageListItem {
+      id: number
+      /** 套餐名称 */
+      packageName: string
+      /** 勾选的菜单权限标识集合（空=不限制） */
+      permissionSigns: string[]
+      /** 勾选菜单数量 */
+      menuCount: number
+      /** 启用状态 1-启用 0-禁用 */
+      enableFlag: number
+      remark: string
+      createTime: string
+    }
+
+    /** 租户套餐列表 */
+    type TenantPackageList = Api.Common.PaginatedResponse<TenantPackageListItem>
+
+    /** 租户套餐搜索参数 */
+    interface TenantPackageSearchParams extends Api.Common.CommonSearchParams {
+      packageName?: string
+    }
+
+    /** 创建租户套餐参数 */
+    interface CreateTenantPackageParams {
+      packageName: string
+      permissionSigns: string[]
+      enableFlag: number
+      remark?: string
+    }
+
+    /** 更新租户套餐参数 */
+    interface UpdateTenantPackageParams extends Partial<CreateTenantPackageParams> {
       id: number
     }
   }

@@ -18,16 +18,6 @@
                 <ArtLogo :size="34" class="shrink-0" />
                 <div class="flex min-w-0 flex-1 items-center justify-between gap-2">
                   <p class="shrink-0 text-xl font-bold leading-6 text-gray-600">Art 智能助手</p>
-                  <p
-                    class="flex items-center gap-1 text-[11px] leading-4"
-                    :class="isOnline ? 'text-g-500' : 'text-danger'"
-                  >
-                    <span
-                      class="inline-block h-1.5 w-1.5 rounded-full"
-                      :class="isOnline ? 'bg-success' : 'bg-danger'"
-                    ></span>
-                    {{ isOnline ? '在线' : '连接异常' }}
-                  </p>
                 </div>
               </div>
 
@@ -125,7 +115,7 @@
               <div
                 ref="messageContainer"
                 v-loading="isLoadingMessages"
-                class="chat-scroll min-h-0 flex-1 overflow-y-auto px-5 py-6"
+                class="chat-scroll relative min-h-0 flex-1 overflow-y-auto px-5 py-6"
               >
                 <!-- 欢迎区 -->
                 <div
@@ -752,9 +742,13 @@
     }
     removeEmptyPendingConversation()
     activeConversationId.value = item.conversationId
+    // 清空旧对话消息并回到顶部，避免加载遮罩被旧内容/底部滚动位置掩盖
+    messages.value = []
+    if (messageContainer.value) {
+      messageContainer.value.scrollTop = 0
+    }
     // 临时新对话尚无服务端数据
     if (!item.persisted) {
-      messages.value = []
       return
     }
     const seq = ++messagesRequestSeq
@@ -1432,6 +1426,13 @@
     white-space: pre-wrap;
     background: #edf3fe;
     border-radius: 16px 16px 4px;
+  }
+
+  // 暗色主题：深色气泡背景，避免浅色文字在浅蓝底上看不清
+  .dark {
+    .user-bubble {
+      background: color-mix(in srgb, var(--theme-color) 34%, #17171c);
+    }
   }
 
   .ai-bubble {

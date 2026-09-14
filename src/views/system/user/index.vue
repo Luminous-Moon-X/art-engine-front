@@ -47,7 +47,9 @@
           >
             <template #left>
               <ElSpace wrap>
-                <ElButton type="primary" @click="handleAdd()" v-ripple>新增用户</ElButton>
+                <ElButton type="primary" @click="handleAdd()" v-ripple v-auth="'system:user:add'"
+                  >新增用户</ElButton
+                >
               </ElSpace>
             </template>
           </ArtTableHeader>
@@ -81,8 +83,8 @@
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
   import { fetchGetUserList, delUser, resetDefaultPassword } from '@/api/user'
-  import { ElTag, ElMessageBox, ElButton } from 'element-plus'
-  import { Edit, Delete, Key } from '@element-plus/icons-vue'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { ElTag, ElMessageBox } from 'element-plus'
   import UserEditDialog from './modules/user-edit-dialog.vue'
   import { UserRowItem } from '@/types/user'
   import { getDeptTreeNoTop } from '@/api/dept'
@@ -194,9 +196,10 @@
           label: '是否启用',
           width: 130,
           formatter: (row: UserRowItem) => {
-            const statusConfig = row.enableFlag
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
+            const statusConfig =
+              row.enableFlag === 1
+                ? { type: 'success', text: '启用' }
+                : { type: 'warning', text: '禁用' }
             return h(
               ElTag,
               { type: statusConfig.type as 'success' | 'warning' },
@@ -207,47 +210,28 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 250,
+          width: 170,
           fixed: 'right',
           align: 'center',
           formatter: (row: UserRowItem) =>
-            h(
-              'div',
-              { style: 'text-align: right; display: flex; gap: 8px; justify-content: flex-end;' },
-              [
-                h(
-                  ElButton,
-                  {
-                    type: 'warning',
-                    vAuth: 'system:userManage:resetDefaultPassword',
-                    link: true,
-                    icon: Key,
-                    onClick: () => handleResetPassword(row)
-                  },
-                  () => '重置密码'
-                ),
-                h(
-                  ElButton,
-                  {
-                    type: 'primary',
-                    link: true,
-                    icon: Edit,
-                    onClick: () => handleEdit(row)
-                  },
-                  () => '编辑'
-                ),
-                h(
-                  ElButton,
-                  {
-                    type: 'danger',
-                    link: true,
-                    icon: Delete,
-                    onClick: () => handleDelete(row)
-                  },
-                  () => '删除'
-                )
-              ]
-            )
+            h('div', { style: 'text-align: right' }, [
+              h(ArtButtonTable, {
+                icon: 'ri:key-2-line',
+                iconClass: 'bg-warning/12 text-warning',
+                auth: 'system:user:resetPassword',
+                onClick: () => handleResetPassword(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'edit',
+                auth: 'system:user:edit',
+                onClick: () => handleEdit(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                auth: 'system:user:delete',
+                onClick: () => handleDelete(row)
+              })
+            ])
         }
       ]
     }
@@ -326,10 +310,17 @@
     children: 'children',
     label: 'label'
   }
-  // 树节点点击事件
+  // 树节点点击事件（再次点击已选中的节点取消选中）
   const handleNodeClick = (data: DeptOptionItem) => {
-    searchFormState.value.deptId = data.value
-    currentNodeKey.value = data.value
+    if (currentNodeKey.value === data.value) {
+      // 再次点击已选中的节点，取消选中并清空部门筛选
+      currentNodeKey.value = undefined
+      treeRef.value?.setCurrentKey(null)
+      searchFormState.value.deptId = undefined
+    } else {
+      searchFormState.value.deptId = data.value
+      currentNodeKey.value = data.value
+    }
     handleSearch()
   }
   // 部门树数据

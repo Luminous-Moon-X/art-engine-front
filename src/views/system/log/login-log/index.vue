@@ -21,6 +21,7 @@
               :disabled="!selectedIds.length"
               @click="handleBatchDelete"
               v-ripple
+              v-auth="'system:login-log:delete'"
             >
               批量删除
             </ElButton>
@@ -176,6 +177,7 @@
             h('div', { style: 'text-align: right' }, [
               h(ArtButtonTable, {
                 type: 'delete',
+                auth: 'system:login-log:delete',
                 onClick: () => handleDelete(row)
               })
             ])

@@ -78,6 +78,9 @@
           </div>
         </div>
 
+        <!-- 租户切换（超级管理员） -->
+        <ArtTenantSwitcher />
+
         <!-- 全屏按钮 -->
         <ArtIconButton
           v-if="shouldShowFullscreen"
@@ -126,7 +129,7 @@
           class="chat-button relative"
           @click="openChat"
         >
-          <div class="breathing-dot absolute top-2 right-2 size-1.5 !bg-success rounded-full"></div>
+          <!-- <div class="breathing-dot absolute top-2 right-2 size-1.5 !bg-success rounded-full"></div> -->
         </ArtIconButton>
 
         <!-- 设置按钮 -->
@@ -183,6 +186,7 @@
   import { useCommon } from '@/hooks/core/useCommon'
   import { useHeaderBar } from '@/hooks/core/useHeaderBar'
   import ArtUserMenu from './widget/ArtUserMenu.vue'
+  import ArtTenantSwitcher from '@/components/core/layouts/art-tenant-switcher/index.vue'
 
   defineOptions({ name: 'ArtHeaderBar' })
 

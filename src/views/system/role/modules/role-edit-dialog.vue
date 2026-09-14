@@ -26,7 +26,7 @@
         />
       </ElFormItem>
       <ElFormItem label="启用">
-        <ElSwitch v-model="form.enableFlag" />
+        <ElSwitch v-model="form.enableFlag" :active-value="1" :inactive-value="0" />
       </ElFormItem>
     </ElForm>
     <template #footer>
@@ -94,7 +94,7 @@
     roleCode: '',
     roleDescription: '',
     createTime: '',
-    enableFlag: true
+    enableFlag: 1
   })
 
   /**
@@ -132,7 +132,7 @@
         roleCode: '',
         roleDescription: '',
         createTime: '',
-        enableFlag: true
+        enableFlag: 1
       })
     }
   }

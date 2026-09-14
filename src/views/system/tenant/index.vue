@@ -1,5 +1,6 @@
+<!-- 租户管理页面 -->
 <template>
-  <div class="flex flex-col gap-4 pb-5">
+  <div class="art-full-height">
     <!-- 搜索区域 -->
     <ArtSearchBar
       ref="searchBarRef"
@@ -11,67 +12,52 @@
       @reset="handleReset"
     />
 
-    <!-- 表格区域 -->
-    <ElCard class="flex-1 art-table-card" shadow="never" style="margin-top: 0">
-      <!-- 表格头部 -->
-      <ArtTableHeader
-        :showZebra="false"
-        :loading="loading"
-        v-model:columns="columnChecks"
-        @refresh="refreshData"
-      >
+    <ElCard class="art-table-card" shadow="never">
+      <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
-          <ElButton type="primary" :icon="Plus" @click="handleAdd" v-ripple> 添加租户 </ElButton>
+          <ElSpace wrap>
+            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增租户</ElButton>
+          </ElSpace>
         </template>
       </ArtTableHeader>
 
+      <!-- 表格 -->
       <ArtTable
-        ref="tableRef"
         :loading="loading"
-        :pagination="pagination"
         :data="data"
         :columns="columns"
-        empty-height="360px"
+        :pagination="pagination"
+        rowKey="id"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
-        <!-- 状态列 -->
-        <template #status="{ row }">
-          <ElTag :type="row.status ? 'success' : 'danger'" effect="light">
-            {{ row.status ? '启用' : '禁用' }}
-          </ElTag>
-        </template>
-
-        <!-- 操作列 -->
-        <template #operation="{ row }">
-          <div class="flex gap-2">
-            <ElButton type="primary" link size="small" @click="handleEdit(row)">编辑</ElButton>
-            <ElButton type="danger" link size="small" @click="handleDelete(row)">删除</ElButton>
-          </div>
-        </template>
       </ArtTable>
     </ElCard>
 
-    <!-- 租户创建/编辑对话框 -->
-    <AddDialog ref="addDialogRef" @success="getData" />
+    <!-- 租户编辑弹窗 -->
+    <TenantEditDialog
+      v-model="dialogVisible"
+      :dialog-type="dialogType"
+      :tenant-data="currentTenantData"
+      @success="refreshData"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue'
-  import { Plus } from '@element-plus/icons-vue'
-  import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchTenantList, deleteTenant } from '@/api/tenant'
-  import AddDialog from './modules/add-dialog.vue'
-  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { fetchTenantPage, deleteTenant } from '@/api/tenant'
+  import { ElTag, ElMessageBox, ElButton } from 'element-plus'
+  import TenantEditDialog from './modules/tenant-edit-dialog.vue'
 
-  defineOptions({ name: 'TenantManagement' })
+  type TenantListItem = Api.Tenant.TenantListItem
+
+  defineOptions({ name: 'Tenant' })
 
   // --- 搜索相关 ---
   const searchFormState = ref({
     tenantName: '',
-    enableFlag: undefined
+    tenantCode: ''
   })
 
   const searchItems = computed(() => [
@@ -82,116 +68,165 @@
       props: { placeholder: '请输入租户名称' }
     },
     {
-      key: 'enableFlag',
-      label: '状态',
-      type: 'select',
-      options: [
-        { label: '全部', value: '' },
-        { label: '启用', value: true },
-        { label: '禁用', value: false }
-      ]
+      key: 'tenantCode',
+      label: '租户编码',
+      type: 'input',
+      props: { placeholder: '请输入租户编码' }
     }
   ])
 
-  // --- 表格相关 ---
+  const dialogVisible = ref(false)
+  const currentTenantData = ref<TenantListItem | undefined>(undefined)
+
+  // 表格相关
   const {
-    data,
     columns,
     columnChecks,
+    data,
     loading,
     pagination,
-    handleSizeChange,
-    handleCurrentChange,
     getData,
     searchParams,
     resetSearchParams,
+    handleSizeChange,
+    handleCurrentChange,
     refreshData
   } = useTable({
     core: {
-      apiFn: fetchTenantList,
+      apiFn: fetchTenantPage,
       apiParams: {
         pageNumber: 1,
-        pageSize: 10,
-        ...searchFormState.value
+        pageSize: 20
       },
-      immediate: true,
+      excludeParams: ['daterange'],
       columnsFactory: () => [
-        { prop: 'id', label: '租户ID', visible: false },
-        { prop: 'tenantName', label: '租户名称', minWidth: 150 },
-        { prop: 'expireDate', label: '有效截止日期', width: 180 },
+        {
+          prop: 'id',
+          label: '租户ID',
+          visible: false
+        },
+        {
+          prop: 'tenantName',
+          label: '租户名称',
+          minWidth: 160
+        },
+        {
+          prop: 'tenantCode',
+          label: '租户编码',
+          width: 140
+        },
+        {
+          prop: 'packageName',
+          label: '租户套餐',
+          minWidth: 140
+        },
+        {
+          prop: 'adminUsername',
+          label: '管理员账号',
+          width: 140
+        },
+        {
+          prop: 'expireDate',
+          label: '到期时间',
+          width: 120,
+          formatter: (row: TenantListItem) => row.expireDate || '-'
+        },
         {
           prop: 'enableFlag',
           label: '是否启用',
-          width: 140,
-          formatter: (row: Api.Tenant.TenantListItem) =>
-            h(
+          width: 110,
+          formatter: (row: TenantListItem) => {
+            const statusConfig =
+              row.enableFlag === 1
+                ? { type: 'success', text: '启用' }
+                : { type: 'warning', text: '禁用' }
+            return h(
               ElTag,
-              { type: row.enableFlag ? 'success' : 'danger' },
-              row.enableFlag ? '启用' : '禁用'
+              { type: statusConfig.type as 'success' | 'warning' },
+              () => statusConfig.text
             )
+          }
         },
-        { prop: 'createTime', label: '创建时间', width: 180 },
+        {
+          prop: 'createTime',
+          label: '创建时间',
+          width: 175
+        },
         {
           prop: 'operation',
           label: '操作',
-          width: 200,
-          align: 'right',
-          formatter: (row: Api.Tenant.TenantListItem) => {
-            return h('div', { style: 'text-align: right' }, [
-              h(ArtButtonTable, {
-                type: 'edit',
-                onClick: () => handleEdit(row)
-              }),
-              h(ArtButtonTable, {
-                type: 'delete',
-                onClick: () => handleDelete(row)
-              })
+          width: 130,
+          fixed: 'right',
+          align: 'center',
+          formatter: (row: TenantListItem) =>
+            h('div', { style: 'display: flex; gap: 8px; justify-content: flex-end;' }, [
+              h(
+                ElButton,
+                {
+                  type: 'primary',
+                  link: true,
+                  onClick: () => handleEdit(row)
+                },
+                () => '编辑'
+              ),
+              h(
+                ElButton,
+                {
+                  type: 'danger',
+                  link: true,
+                  onClick: () => handleDelete(row)
+                },
+                () => '删除'
+              )
             ])
-          }
         }
       ]
     }
   })
 
+  // 弹窗类型 新增or修改
+  const dialogType = ref<'add' | 'edit'>('add')
+
+  // 打开新增/修改弹窗
+  const showDialog = (type: 'add' | 'edit', row?: TenantListItem) => {
+    dialogVisible.value = true
+    dialogType.value = type
+    currentTenantData.value = row
+  }
+
+  /**
+   * 搜索处理
+   */
   const handleSearch = () => {
     Object.assign(searchParams, searchFormState.value)
     getData()
   }
 
+  // 重置查询条件
   const handleReset = () => {
     resetSearchParams()
   }
 
-  // --- 表单相关 ---
-  const addDialogRef = ref()
-
-  const handleAdd = () => {
-    addDialogRef.value?.open('add')
+  // 编辑租户
+  const handleEdit = (row: TenantListItem) => {
+    showDialog('edit', row)
   }
 
-  const handleEdit = (row: Api.Tenant.TenantListItem) => {
-    addDialogRef.value?.open('edit', row)
-  }
-
-  const handleDelete = (row: Api.Tenant.TenantListItem) => {
-    ElMessageBox.confirm(`确认删除租户 "${row.tenantName}" 吗?`, '警告', {
+  // 删除租户
+  const handleDelete = (row: TenantListItem) => {
+    ElMessageBox.confirm(`确定删除租户"${row.tenantName}"吗？此操作不可恢复！`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
-    }).then(async () => {
-      await deleteTenant(row.id)
-      ElMessage.success('删除成功')
-      getData()
     })
+      .then(() => {
+        deleteTenant(row.id).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            refreshData()
+          }
+        })
+      })
+      .catch(() => {})
   }
-
-  onMounted(() => {
-    // Initial load handled by useTable immediate: true
-  })
 </script>
-
-<style scoped>
-  .art-table-card {
-    /* Ensure table takes available space */
-  }
-</style>
