@@ -1,9 +1,27 @@
 import request from '@/utils/http'
 
 /**
- * 获取租户列表
+ * 获取多租户公共配置（登录页使用）
  */
-export function fetchTenantList(params: Api.Tenant.TenantSearchParams) {
+export function fetchTenantConfig() {
+  return request.get<Api.Tenant.TenantConfig>({
+    url: '/api/tenant/config'
+  })
+}
+
+/**
+ * 获取租户列表（登录页/切换租户下拉）
+ */
+export function fetchTenantList() {
+  return request.get<Api.Tenant.TenantOptionItem[]>({
+    url: '/api/tenant/list'
+  })
+}
+
+/**
+ * 分页获取租户列表
+ */
+export function fetchTenantPage(params: Api.Tenant.TenantSearchParams) {
   return request.post<Api.Tenant.TenantList>({
     url: '/api/tenant/page',
     params: params
@@ -11,11 +29,11 @@ export function fetchTenantList(params: Api.Tenant.TenantSearchParams) {
 }
 
 /**
- * 创建租户
+ * 创建租户（同时创建租户管理员账号）
  */
 export function createTenant(data: Api.Tenant.CreateTenantParams) {
-  return request.post<Api.Tenant.TenantListItem>({
-    url: '/api/tenant/create',
+  return request.post<boolean>({
+    url: '/api/tenant/add',
     data
   })
 }
@@ -24,8 +42,8 @@ export function createTenant(data: Api.Tenant.CreateTenantParams) {
  * 更新租户
  */
 export function updateTenant(data: Api.Tenant.UpdateTenantParams) {
-  return request.put<Api.Tenant.TenantListItem>({
-    url: '/api/tenant/update',
+  return request.put<boolean>({
+    url: '/api/tenant/edit',
     data
   })
 }
@@ -34,17 +52,18 @@ export function updateTenant(data: Api.Tenant.UpdateTenantParams) {
  * 删除租户
  */
 export function deleteTenant(id: number) {
-  return request.del({
+  return request.del<boolean>({
     url: '/api/tenant/delete',
-    params: { id }
+    data: { ids: [id] }
   })
 }
 
 /**
- * 获取菜单权限树
+ * 切换当前生效租户（超级管理员）
  */
-export function fetchMenuTree() {
-  return request.get<any[]>({
-    url: '/api/tenant/menus'
+export function switchTenant(tenantId: number) {
+  return request.post<boolean>({
+    url: '/api/tenant/switch',
+    params: { tenantId }
   })
 }

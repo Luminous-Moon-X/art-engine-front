@@ -17,6 +17,7 @@ module.exports = {
       [
         'feat', // 新增功能
         'fix', // 修复缺陷
+        'remove', // 移除内容
         'docs', // 文档变更
         'style', // 代码格式（不影响功能，例如空格、分号等格式修正）
         'refactor', // 代码重构（不包括 bug 修复、功能新增）
@@ -52,6 +53,7 @@ module.exports = {
       { value: "feat",     name: "feat:     新增功能" },
       { value: "fix",      name: "fix:      修复缺陷" },
       { value: "docs",     name: "docs:     文档变更" },
+      { value: "remove",   name: "remove:   移除内容" },
       { value: "style",    name: "style:    代码格式（不影响功能，例如空格、分号等格式修正）" },
       { value: "refactor", name: "refactor: 代码重构（不包括 bug 修复、功能新增）" },
       { value: "perf",     name: "perf:     性能优化" },

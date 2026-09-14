@@ -148,9 +148,10 @@
           label: '是否启用',
           width: 150,
           formatter: (row: DeptRowItem) => {
-            const statusConfig = row.enableFlag
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
+            const statusConfig =
+              row.enableFlag === 1
+                ? { type: 'success', text: '启用' }
+                : { type: 'warning', text: '禁用' }
             return h(
               ElTag,
               { type: statusConfig.type as 'success' | 'warning' },

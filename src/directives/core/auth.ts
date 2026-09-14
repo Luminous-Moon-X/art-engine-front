@@ -45,9 +45,10 @@ function checkAuthPermission(el: HTMLElement, binding: AuthBinding): void {
   const authList = (router.currentRoute.value.meta.authList as Array<{ authMark: string }>) || []
 
   const userStore = useUserStore()
+  const userType = userStore.getUserInfo.userType
 
-  // 如果传入的权限标识为空或者是管理员，直接返回
-  if (!binding.value || userStore.getUserInfo.userType === 'admin') {
+  // 如果传入的权限标识为空，或者是管理员（租户管理员/平台超管），直接返回
+  if (!binding.value || userType === 'admin' || userType === 'superadmin') {
     return
   }
 

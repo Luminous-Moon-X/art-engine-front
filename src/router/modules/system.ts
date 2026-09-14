@@ -45,6 +45,28 @@ export const systemRoutes: AppRouteRecord = {
       }
     },
     {
+      path: 'tenant',
+      name: 'Tenant',
+      component: '/system/tenant',
+      meta: {
+        title: 'menus.system.tenant',
+        icon: 'ri:building-2-line',
+        keepAlive: true,
+        roles: ['R_SUPER']
+      }
+    },
+    {
+      path: 'tenant-package',
+      name: 'TenantPackage',
+      component: '/system/tenant-package',
+      meta: {
+        title: 'menus.system.tenantPackage',
+        icon: 'ri:apps-2-line',
+        keepAlive: true,
+        roles: ['R_SUPER']
+      }
+    },
+    {
       path: 'menu',
       name: 'Menus',
       component: '/system/menu',

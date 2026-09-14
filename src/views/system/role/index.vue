@@ -16,7 +16,9 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton @click="showDialog('add')" v-ripple>新增角色</ElButton>
+            <ElButton @click="showDialog('add')" v-ripple v-auth="'system:role:add'"
+              >新增角色</ElButton
+            >
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -128,9 +130,10 @@
           label: '是否启用',
           width: 140,
           formatter: (row) => {
-            const statusConfig = row.enableFlag
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
+            const statusConfig =
+              row.enableFlag === 1
+                ? { type: 'success', text: '启用' }
+                : { type: 'warning', text: '禁用' }
             return h(
               ElTag,
               { type: statusConfig.type as 'success' | 'warning' },
@@ -153,10 +156,12 @@
             h('div', { style: 'text-align: right' }, [
               h(ArtButtonTable, {
                 type: 'edit',
+                auth: 'system:role:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                auth: 'system:role:delete',
                 onClick: () => handleDelete(row)
               })
             ])

@@ -12,7 +12,9 @@
     <ElCard class="art-table-card" shadow="never">
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
-          <ElButton type="primary" @click="uploadFile" v-ripple>上传文件</ElButton>
+          <ElButton type="primary" @click="uploadFile" v-ripple v-auth="'system:oss-file:upload'"
+            >上传文件</ElButton
+          >
         </template>
       </ArtTableHeader>
 
@@ -34,8 +36,8 @@
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
   import { fetchOssFilePage, deleteOssFile, downloadOssFile } from '@/api/oss'
-  import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
-  import { Delete, Download } from '@element-plus/icons-vue'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
+  import { ElMessage, ElMessageBox } from 'element-plus'
   import { OssFileRowItem } from '@/types/oss'
   import type { VNode } from 'vue'
   import UploadDialog from './modules/upload-dialog.vue'
@@ -102,7 +104,8 @@
         {
           prop: 'contentType',
           label: '内容类型',
-          minWidth: 160
+          minWidth: 160,
+          showOverflowTooltip: true
         },
         {
           prop: 'fileSize',
@@ -122,43 +125,29 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 230,
+          width: 140,
           fixed: 'right',
           align: 'center',
           formatter: (row: OssFileRowItem) => {
             const buttons: VNode[] = [
-              h(
-                ElButton,
-                {
-                  type: 'primary',
-                  link: true,
-                  size: 'small',
-                  loading: downloadLoading.value.has(row.id),
-                  icon: Download,
-                  onClick: () => handleDownload(row)
-                },
-                () => '下载'
-              ),
-              h(
-                ElButton,
-                {
-                  type: 'danger',
-                  link: true,
-                  size: 'small',
-                  onClick: () => handleDelete(row),
-                  icon: Delete
-                },
-                () => '删除'
-              )
+              h(ArtButtonTable, {
+                icon: 'ri:download-2-line',
+                iconClass: 'bg-theme/12 text-theme',
+                auth: 'system:oss-file:download',
+                onClick: () => handleDownload(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                auth: 'system:oss-file:delete',
+                onClick: () => handleDelete(row)
+              })
             ]
-            return h('div', { class: 'flex justify-center gap-1' }, buttons)
+            return h('div', { class: 'flex justify-center' }, buttons)
           }
         }
       ]
     }
   })
-
-  const downloadLoading = ref<Set<number>>(new Set())
 
   const uploadFile = () => {
     dialogVisible.value = true
@@ -175,18 +164,13 @@
 
   const handleDownload = async (row: OssFileRowItem) => {
     ElMessage.info('正在下载文件，请稍等...')
-    downloadLoading.value.add(row.id)
-    try {
-      const data = await downloadOssFile(row.id)
-      const url = URL.createObjectURL(data)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = row.fileName
-      link.click()
-      URL.revokeObjectURL(url)
-    } finally {
-      downloadLoading.value.delete(row.id)
-    }
+    const data = await downloadOssFile(row.id)
+    const url = URL.createObjectURL(data)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = row.fileName
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   const handleDelete = (row: OssFileRowItem) => {

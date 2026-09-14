@@ -1,73 +1,107 @@
-<img  src="./src/assets/images/common/logo-title.png" />
-
-<br />
-<p align="left">一款兼具设计美学与高效开发的后台管理系统，助你快速构建专业级应用</p>
-
-<div align="left">
-<p>
-  <a href="https://gitee.com/hiroshi-xh/art-engine/stargazers">
-    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/star.svg?theme=dark" alt="star"/>
-  </a>
-  <a href="https://gitee.com/hiroshi-xh/art-engine/members">
-    <img src="https://gitee.com/hiroshi-xh/art-engine/badge/fork.svg?theme=dark" alt="fork"/>
-  </a>
-</p>
+<div align="center">
+  <img src="./src/assets/images/common/logo-title.png" alt="Art Design Pro" width="420" />
 </div>
 
-## 这个项目有什么特别的呢？
+<br />
 
-**界面设计**：现代化 UI 设计，流畅交互，以用户体验与视觉设计为核心
+<p align="center">
+  <b>Art Engine</b> 平台的前端管理后台，<br />
+  基于 <b>Vue 3 · TypeScript · Vite · Element Plus · Tailwind CSS</b> 构建。
+</p>
 
-**极速上手**：简洁架构 + 完整文档，后端开发者也能轻松使用
+<div align="center"><a href="./README.md">English</a> | 简体中文</div>
 
-**丰富组件**：内置数据展示、表单等多种高质量组件，满足不同业务场景的需求
+<br />
 
-**丝滑交互**：按钮点击、主题切换、页面过渡、图表动画，体验媲美商业产品
+<div align="center">
 
-**高效开发**：内置 useTable、ArtForm 等实用 API，显著提升开发效率
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE) [![stars](https://img.shields.io/github/stars/Luminous-Moon-X/art-engine-front)](https://github.com/Luminous-Moon-X/art-engine-front/stargazers) [![forks](https://img.shields.io/github/forks/Luminous-Moon-X/art-engine-front)](https://github.com/Luminous-Moon-X/art-engine-front/network/members)
 
-## 技术栈
+</div>
 
-开发框架：Vue3、TypeScript、Vite、Element-Plus、Tailwind CSS
+<br />
 
-代码规范：Eslint、Prettier、Stylelint、Husky、Lint-staged、cz-git
+## ✨ 这个项目有什么特别之处？
 
-## 预览
+- **好看又流畅**：现代化界面设计，交互体验媲美商业产品
+- **组件拿来即用**：表格、表单、搜索栏、图表、富文本编辑器等常用组件开箱即用，快速拼装业务页面
+- **开发更高效**：列表、表单、图表等常见页面模式已封装成易用的积木式能力
+- **主题灵活多变**：浅色 / 暗黑 / 跟随系统主题、自定义主题色、多种菜单布局、页面过渡动画、水印、锁屏等
+- **多语言**：内置中英文切换
+- **两种运行模式**：可对接真实后端，也可以不依赖后端、使用内置 Mock 数据直接运行演示
+- **干净起步**：一条命令清理全部演示数据，得到可直接开发的工程
 
-<kbd><img src="./src/assets/images/common/light.png" alt="浅色主题"/></kbd>
+## 🖼️ 预览
 
-<kbd><img src="./src/assets/images/common/dark.png" alt="暗黑主题"/></kbd>
+<kbd><img src="./src/assets/images/common/light.png" alt="浅色主题" /></kbd>
 
-## 安装运行
+<kbd><img src="./src/assets/images/common/dark.png" alt="暗黑主题" /></kbd>
+
+## 🛠️ 技术栈
+
+Vue 3 · TypeScript · Vite · Vue Router · Pinia · Element Plus · Tailwind CSS · Axios · ECharts · vue-i18n · xlsx · Mock.js
+
+代码规范：ESLint · Prettier · Stylelint · Husky · lint-staged · commitizen (cz-git)
+
+## 🚀 快速开始
+
+**环境要求**：Node.js >= 20.19.0，pnpm >= 8.8.0
 
 ```bash
 # 安装依赖
 pnpm install
 
-# 如果 pnpm install 安装失败，尝试使用下面的命令安装依赖
+# 如果安装失败，尝试：
 pnpm install --ignore-scripts
 
-# 本地开发环境启动
+# 启动本地开发环境（默认 http://localhost:3006）
 pnpm dev
 
-# 生产环境打包
+# 类型检查并打包生产环境（输出到 dist/）
 pnpm build
+
+# 预览生产构建产物
+pnpm serve
 ```
 
-## 兼容性
+### 常用脚本
 
-支持 Chrome、Safari、Firefox 等现代主流浏览器。
+| 命令                     | 说明                   |
+| ------------------------ | ---------------------- |
+| `pnpm dev`               | 启动开发环境           |
+| `pnpm build`             | 打包生产环境           |
+| `pnpm serve`             | 预览构建产物           |
+| `pnpm lint` / `pnpm fix` | 代码检查 / 自动修复    |
+| `pnpm lint:prettier`     | 格式化代码             |
+| `pnpm lint:stylelint`    | 修复样式               |
+| `pnpm commit`            | 规范提交（commitizen） |
+| `pnpm clean:dev`         | 清理演示数据           |
 
-## 贡献
+### 环境变量
 
-我们真诚欢迎并感谢每一位贡献者的支持！无论您有新想法、功能建议还是代码优化，都可以通过以下方式参与：
+主要配置项位于 `.env`、`.env.development`、`.env.production`：
 
-提交 Pull Request：分享您的代码，助力项目成长。
+| 变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `VITE_PORT` | 开发服务器端口 | `3006` |
+| `VITE_ACCESS_MODE` | `backend`（对接真实接口）/ `frontend`（Mock 数据） | `backend` |
+| `VITE_API_URL` | API 请求基础路径 | `/` |
+| `VITE_API_PROXY_URL` | 开发环境代理目标（后端地址） | `http://localhost:8080` |
+| `VITE_BASE_URL` | 应用部署基础路径 | `/` |
 
-创建 GitHub Issue：提出 bug 反馈或新功能建议，让我们一起完善。
+## 🔌 后端联调
 
-您的每一点贡献都让这个项目更进一步！快来加入我们的开源社区吧！
+本项目是 **Art Engine** 平台的前端。在 `backend` 模式（默认）下，请求通过 `/api` 前缀访问后端，开发环境由 Vite 代理转发：
 
-## 持续优化与扩展
+- 开发环境：`VITE_API_PROXY_URL = http://localhost:8080`（Art Engine 默认地址）
+- 生产环境：将 `VITE_API_URL` 配置为真实后端地址
 
-项目保持活跃更新，支持最新前端技术栈，兼容主流框架，确保长期稳定性和扩展性。社区驱动的反馈机制，让你的需求快速融入项目迭代。
+服务端实现请参见 [Art Engine](https://github.com/Luminous-Moon-X/art-engine) 后端仓库。
+
+## 🌐 浏览器兼容性
+
+支持 Chrome、Edge、Firefox、Safari 等现代主流浏览器。
+
+## 📄 License
+
+[MIT](./LICENSE)
