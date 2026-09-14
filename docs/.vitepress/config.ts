@@ -1,10 +1,21 @@
 ﻿import { defineConfig } from 'vitepress'
 
+/**
+ * GitHub Pages 项目站点地址为 https://<owner>.github.io/<repo>/ 形式的子路径。
+ * 在 CI（GitHub Actions）中必须把 base 设置为仓库名（本项目为 art-engine-front），
+ * 否则页面虽然能打开，但 JS / CSS 等静态资源会 404，最终白屏。
+ * 本地开发与自定义域名 / 根路径部署仍为 '/'；
+ * 如需在 CI 中覆盖，可传入环境变量 VITEPRESS_BASE。
+ */
+const base = process.env.VITEPRESS_BASE ?? (process.env.GITHUB_ACTIONS ? '/art-engine-front/' : '/')
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  base,
   title: 'Art Engine',
   description: '一个现代化的后台管理系统',
-  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
+  // head 中的绝对路径不会被 VitePress 自动加上 base，这里手动拼接，避免子路径下 favicon 404
+  head: [['link', { rel: 'icon', href: `${base}favicon.ico` }]],
   /**
    * 多语言配置：必须放在顶层（站点配置）中。
    * 只有这里定义了多个语言，右上角的语言切换菜单才会出现；
