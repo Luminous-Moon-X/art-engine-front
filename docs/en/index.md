@@ -25,4 +25,6 @@ features:
     details: A uniquely designed two-level cache mechanism automatically loads frequently used data into two levels of cache when the service starts, guaranteeing excellent speed and data safety
   - title: Beautiful Interface
     details: Combining design aesthetics with efficient development, it provides theme colors, layout modes, dark mode, and system configuration examples
+  - title: AI Integration
+    details: Supports configuring locally deployed AI, uploading documents to build a personal knowledge base, and protecting confidential documents to keep data secure
 ---
