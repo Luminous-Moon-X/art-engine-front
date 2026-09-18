@@ -90,6 +90,24 @@
   const lockMenuType = ref(false)
   const parentId = ref(-1)
 
+  /**
+   * 递归按排序号升序排列菜单数据（含子菜单）
+   * @param rows 菜单行数据
+   * @returns 排序后的菜单行数据
+   */
+  const sortMenuByOrderNum = (rows: MenuRowItem[]): MenuRowItem[] => {
+    return [...rows]
+      .sort((a, b) => {
+        const orderDiff = Number(a.orderNum ?? 0) - Number(b.orderNum ?? 0)
+        // 排序号相同时按ID升序，保证展示顺序稳定
+        return orderDiff !== 0 ? orderDiff : Number(a.id ?? 0) - Number(b.id ?? 0)
+      })
+      .map((row) => ({
+        ...row,
+        children: row.children?.length ? sortMenuByOrderNum(row.children) : row.children
+      }))
+  }
+
   // 表格相关
   const {
     columns,
@@ -193,6 +211,10 @@
           }
         }
       ]
+    },
+    // 数据处理：按排序号升序展示（含子菜单），与排序号保持一致
+    transform: {
+      dataTransformer: (records) => sortMenuByOrderNum(records ?? [])
     }
   })
 
