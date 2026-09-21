@@ -130,7 +130,7 @@
         accessKey: props.ossData.accessKey,
         secretKey: '',
         bucketName: props.ossData.bucketName,
-        enableFlag: props.ossData.enableFlag === 1,
+        enableFlag: props.ossData.enableFlag,
         remark: props.ossData.remark || ''
       })
     } else {
@@ -158,7 +158,7 @@
       submitting.value = true
       const params: OssConfigSubmitParams = {
         ...form,
-        enableFlag: form.enableFlag ? 1 : 0
+        enableFlag: form.enableFlag
       }
       if (props.dialogType === 'add') {
         await addOssConfig(params)

@@ -10,13 +10,44 @@
       label-width="100px"
       @search="handleSearch"
       @reset="handleReset"
-    />
+    >
+      <!-- 授权客体：与新增/编辑表单保持一致，左侧表名 + 右侧表备注 -->
+      <!-- 后端按 LIKE 匹配单个表名，故搜索端为单选 -->
+      <template #permissionObject>
+        <ElSelect
+          v-model="searchFormState.permissionObject"
+          filterable
+          clearable
+          placeholder="请选择授权客体"
+        >
+          <ElOption
+            v-for="item in tableOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+            <div class="flex items-center justify-between gap-4 w-full">
+              <span>{{ item.label }}</span>
+              <span class="text-xs text-gray-400">{{ item.comment || '-' }}</span>
+            </div>
+          </ElOption>
+        </ElSelect>
+      </template>
+    </ArtSearchBar>
 
     <ElCard class="art-table-card" shadow="never">
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
             <ElButton type="primary" @click="showDialog('add')" v-ripple>新增规则</ElButton>
+            <ElButton
+              type="danger"
+              :disabled="!selectedIds.length"
+              @click="handleBatchDelete"
+              v-ripple
+            >
+              批量删除
+            </ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -27,6 +58,8 @@
         :data="data"
         :columns="columns"
         :pagination="pagination"
+        rowKey="id"
+        @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
@@ -48,14 +81,19 @@
   import {
     fetchDataPermissionPage,
     deleteDataPermission,
-    updateDataPermissionStatus
+    updateDataPermissionStatus,
+    fetchPermissionTableList
   } from '@/api/data-permission'
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import DataPermissionEditDialog from './modules/data-permission-edit-dialog.vue'
   import { ElMessageBox, ElTag, ElText } from 'element-plus'
-  import { DataPermissionRowItem } from '@/types/data-permission'
+  import { DataPermissionOptionItem, DataPermissionRowItem } from '@/types/data-permission'
   import { getDict } from '@/utils/dict'
-  import { loadAllSubjectOptions, type SubjectOption } from './modules/subject-options'
+  import {
+    loadAllSubjectOptions,
+    loadSubjectOptions,
+    type SubjectOption
+  } from './modules/subject-options'
   import type { DictItem } from '@/types/dict'
   import type { VNode } from 'vue'
 
@@ -90,6 +128,47 @@
    */
   const subjectOptionsMap = ref<Record<string, SubjectOption[]>>({})
 
+  /**
+   * 搜索栏授权主体选项
+   * 与新增/编辑表单保持一致：随「授权主体类型」联动加载
+   */
+  const permissionSubjectOptions = ref<SubjectOption[]>([])
+
+  /**
+   * 搜索栏授权客体（数据库表）选项
+   * 与新增/编辑表单保持一致：左侧表名 + 右侧表备注
+   */
+  const tableOptions = ref<DataPermissionOptionItem[]>([])
+
+  /**
+   * 按授权主体类型加载搜索栏的授权主体选项
+   * 角色 -> 角色列表，部门 -> 部门列表，用户 -> 用户列表
+   *
+   * @param subjectType 授权主体类型
+   */
+  const loadPermissionSubjectOptions = (subjectType: string) => {
+    loadSubjectOptions(subjectType)
+      .then((res) => {
+        permissionSubjectOptions.value = res || []
+      })
+      .catch((err) => {
+        console.error('[数据权限] 授权主体选项加载失败：', err)
+        permissionSubjectOptions.value = []
+      })
+  }
+
+  /**
+   * 搜索栏授权主体类型变化
+   * 与新增/编辑表单保持一致：重新加载授权主体选项并清空已选授权主体
+   */
+  watch(
+    () => searchFormState.value.subjectType,
+    (value) => {
+      searchFormState.value.permissionSubject = ''
+      loadPermissionSubjectOptions(value)
+    }
+  )
+
   onMounted(() => {
     getDict('system_permission_subject_type').then((res) => {
       subjectTypeOptions.value = res || []
@@ -103,6 +182,20 @@
       })
       .catch((err) => {
         console.error('[数据权限] 授权主体名称加载失败：', err)
+      })
+    // 搜索栏授权主体选项：按当前已选类型加载
+    loadPermissionSubjectOptions(searchFormState.value.subjectType)
+    // 搜索栏授权客体选项：与新增/编辑表单取同一份数据库表清单
+    fetchPermissionTableList()
+      .then((res) => {
+        tableOptions.value = (res || []).map((item) => ({
+          label: item.tableName,
+          value: item.tableName,
+          comment: item.tableComment
+        }))
+      })
+      .catch((err) => {
+        console.error('[数据权限] 授权客体选项加载失败：', err)
       })
   })
 
@@ -148,14 +241,24 @@
     {
       key: 'permissionSubject',
       label: '授权主体',
-      type: 'input',
-      props: { placeholder: '请输入授权主体' }
+      type: 'select',
+      props: {
+        placeholder: '请先选择授权主体类型',
+        clearable: true,
+        filterable: true,
+        options: permissionSubjectOptions.value
+      }
     },
     {
       key: 'permissionObject',
       label: '授权客体',
-      type: 'input',
-      props: { placeholder: '请输入授权客体' }
+      type: 'select',
+      props: {
+        placeholder: '请选择授权客体',
+        clearable: true,
+        filterable: true,
+        options: tableOptions.value
+      }
     },
     {
       key: 'enableFlag',
@@ -175,6 +278,12 @@
   const dialogVisible = ref(false)
   const dialogType = ref<'add' | 'edit'>('add')
   const currentPermissionData = ref<DataPermissionRowItem | undefined>(undefined)
+
+  /**
+   * 表格已勾选的数据权限ID集合
+   * 用于批量删除按钮的禁用状态与删除目标
+   */
+  const selectedIds = ref<number[]>([])
 
   // 表格相关
   const {
@@ -197,6 +306,7 @@
         pageSize: 20
       },
       columnsFactory: () => [
+        { type: 'selection', width: 60 },
         {
           prop: 'subjectType',
           label: '授权主体类型',
@@ -305,6 +415,15 @@
     showDialog('edit', row)
   }
 
+  /**
+   * 表格勾选变化
+   *
+   * @param selection 当前勾选的行数据
+   */
+  const handleSelectionChange = (selection: DataPermissionRowItem[]) => {
+    selectedIds.value = selection.map((row) => row.id as number)
+  }
+
   // 启用/禁用数据权限
   const handleToggleStatus = (row: DataPermissionRowItem, enableFlag: boolean) => {
     const action = enableFlag ? '启用' : '禁用'
@@ -335,6 +454,29 @@
         deleteDataPermission([row.id as number]).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
+            refreshData()
+          }
+        })
+      })
+      .catch(() => {})
+  }
+
+  // 批量删除数据权限
+  const handleBatchDelete = () => {
+    ElMessageBox.confirm(
+      `确定删除选中的 ${selectedIds.value.length} 条数据权限规则吗？此操作不可恢复！`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+      .then(() => {
+        deleteDataPermission(selectedIds.value).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            selectedIds.value = []
             refreshData()
           }
         })

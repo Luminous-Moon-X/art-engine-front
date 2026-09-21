@@ -63,7 +63,7 @@
         </ElCol>
         <ElCol :span="12">
           <ElFormItem label="是否启用" prop="enableFlag">
-            <ElSwitch v-model="form.enableFlag" :active-value="1" :inactive-value="0" />
+            <ElSwitch v-model="form.enableFlag" />
           </ElFormItem>
         </ElCol>
       </ElRow>
@@ -75,7 +75,7 @@
         </ElCol>
         <ElCol :span="12">
           <ElFormItem label="是否启用" prop="enableFlag">
-            <ElSwitch v-model="form.enableFlag" :active-value="1" :inactive-value="0" />
+            <ElSwitch v-model="form.enableFlag" />
           </ElFormItem>
         </ElCol>
       </ElRow>
@@ -147,7 +147,7 @@
     tenantName: '',
     packageId: undefined,
     adminUsername: '',
-    enableFlag: 1,
+    enableFlag: true,
     expireDate: '',
     remark: ''
   })

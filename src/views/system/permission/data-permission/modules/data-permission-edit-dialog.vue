@@ -27,6 +27,7 @@
           clearable
           collapse-tags
           collapse-tags-tooltip
+          :max-collapse-tags="2"
           placeholder="请选择授权客体（可多选，不选表示对所有表生效）"
         >
           <ElOption
@@ -279,6 +280,7 @@
         clearable: true,
         collapseTags: true,
         collapseTagsTooltip: true,
+        maxCollapseTags: 2,
         placeholder: '请选择部门（可多选）'
       }
     },

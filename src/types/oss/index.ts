@@ -8,7 +8,7 @@ export interface OssConfigRowItem {
   endpoint: string
   accessKey: string
   bucketName: string
-  enableFlag: number
+  enableFlag: boolean
   remark?: string
   createTime?: string
 }
@@ -29,9 +29,7 @@ export interface OssFileUploadForm {
   directory?: string | null
 }
 
-export type OssConfigSubmitParams = Omit<OssConfigForm, 'enableFlag'> & {
-  enableFlag: number
-}
+export type OssConfigSubmitParams = OssConfigForm
 
 export type OssConfigSearchParams = Partial<
   Pick<OssConfigRowItem, 'configName' | 'bucketName' | 'enableFlag'> & Api.Common.CommonSearchParams
