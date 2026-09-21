@@ -53,11 +53,13 @@
 
   defineOptions({ name: 'OssManagement' })
 
-  const searchFormState = ref<{ configName: string; bucketName: string; enableFlag: number | '' }>({
-    configName: '',
-    bucketName: '',
-    enableFlag: ''
-  })
+  const searchFormState = ref<{ configName: string; bucketName: string; enableFlag: boolean | '' }>(
+    {
+      configName: '',
+      bucketName: '',
+      enableFlag: ''
+    }
+  )
 
   const searchItems = computed(() => [
     {
@@ -78,8 +80,8 @@
       type: 'select',
       options: [
         { label: '全部', value: '' },
-        { label: '启用', value: 1 },
-        { label: '禁用', value: 0 }
+        { label: '启用', value: true },
+        { label: '禁用', value: false }
       ]
     }
   ])
@@ -138,8 +140,8 @@
           label: '启用状态',
           minWidth: 160,
           formatter: (row: OssConfigRowItem) =>
-            h(ElTag, { type: row.enableFlag === 1 ? 'success' : 'danger' }, () =>
-              row.enableFlag === 1 ? '启用' : '禁用'
+            h(ElTag, { type: row.enableFlag ? 'success' : 'danger' }, () =>
+              row.enableFlag ? '启用' : '禁用'
             )
         },
         {
@@ -160,7 +162,7 @@
           align: 'center',
           formatter: (row: OssConfigRowItem) => {
             const buttons: VNode[] = []
-            if (row.enableFlag !== 1) {
+            if (!row.enableFlag) {
               buttons.push(
                 h(ArtButtonTable, {
                   icon: 'ri:play-circle-line',

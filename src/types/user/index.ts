@@ -3,7 +3,7 @@
  */
 export interface UserRowItem {
   id?: number
-  enableFlag: number
+  enableFlag: boolean
   userName: string
   nickName: string
   password: string

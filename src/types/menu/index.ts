@@ -3,7 +3,7 @@ export interface MenuRowItem {
   // 主键ID
   id: number | null
   // 是否启用
-  enableFlag: number
+  enableFlag: boolean
   // 菜单类型
   menuType: 'menu' | 'button'
   // 菜单名称

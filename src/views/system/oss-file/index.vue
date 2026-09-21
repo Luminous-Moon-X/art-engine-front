@@ -44,11 +44,13 @@
 
   defineOptions({ name: 'OssFileManagement' })
 
-  const searchFormState = ref<{ configName: string; bucketName: string; enableFlag: number | '' }>({
-    configName: '',
-    bucketName: '',
-    enableFlag: ''
-  })
+  const searchFormState = ref<{ configName: string; bucketName: string; enableFlag: boolean | '' }>(
+    {
+      configName: '',
+      bucketName: '',
+      enableFlag: ''
+    }
+  )
 
   const searchItems = computed(() => [
     {
