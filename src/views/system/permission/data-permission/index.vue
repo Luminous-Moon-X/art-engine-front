@@ -39,12 +39,19 @@
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
           <ElSpace wrap>
-            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增规则</ElButton>
+            <ElButton
+              type="primary"
+              @click="showDialog('add')"
+              v-ripple
+              v-auth="'system:data-permission:add'"
+              >新增规则</ElButton
+            >
             <ElButton
               type="danger"
               :disabled="!selectedIds.length"
               @click="handleBatchDelete"
               v-ripple
+              v-auth="'system:data-permission:delete'"
             >
               批量删除
             </ElButton>
@@ -361,6 +368,7 @@
                 h(ArtButtonTable, {
                   icon: 'ri:pause-circle-line',
                   iconClass: 'bg-warning/12 text-warning',
+                  auth: 'system:data-permission:status',
                   onClick: () => handleToggleStatus(row, false)
                 })
               )
@@ -369,6 +377,7 @@
                 h(ArtButtonTable, {
                   icon: 'ri:play-circle-line',
                   iconClass: 'bg-success/12 text-success',
+                  auth: 'system:data-permission:status',
                   onClick: () => handleToggleStatus(row, true)
                 })
               )
@@ -376,10 +385,12 @@
             buttons.push(
               h(ArtButtonTable, {
                 type: 'edit',
+                auth: 'system:data-permission:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                auth: 'system:data-permission:delete',
                 onClick: () => handleDelete(row)
               })
             )
