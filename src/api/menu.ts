@@ -1,9 +1,9 @@
 import request from '@/utils/http'
 import { type MenuRowItem, type MenuSearchParams, type MenuTreeItem } from '@/types/menu'
 
-// 获取菜单列表
+// 获取菜单列表（分页）
 export function fetchGetMenuList(params: MenuSearchParams) {
-  return request.post<MenuRowItem[]>({
+  return request.post<Api.Common.PaginatedResponse<MenuRowItem>>({
     url: '/api/menu/page',
     params: params
   })

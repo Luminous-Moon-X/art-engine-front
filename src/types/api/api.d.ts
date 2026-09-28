@@ -149,7 +149,7 @@ declare namespace Api {
       roleCode: string
       roleDescription: string
       createTime: string
-      enableFlag: number
+      enableFlag: boolean
     }
     /** 角色选项项 */
     interface RoleOptionItem {
@@ -187,8 +187,8 @@ declare namespace Api {
       packageName: string
       /** 租户管理员用户名 */
       adminUsername: string
-      /** 启用状态 1-启用 0-禁用 */
-      enableFlag: number
+      /** 启用状态 true-启用 false-禁用 */
+      enableFlag: boolean
       /** 到期时间 */
       expireDate: string | null
       /** 备注 */
@@ -212,7 +212,7 @@ declare namespace Api {
       tenantName: string
       /** 租户套餐ID */
       packageId: number
-      enableFlag: number
+      enableFlag: boolean
       expireDate?: string
       remark?: string
       /** 租户管理员用户名（同时创建该用户） */
@@ -240,8 +240,8 @@ declare namespace Api {
       permissionSigns: string[]
       /** 勾选菜单数量 */
       menuCount: number
-      /** 启用状态 1-启用 0-禁用 */
-      enableFlag: number
+      /** 启用状态 true-启用 false-禁用 */
+      enableFlag: boolean
       remark: string
       createTime: string
     }
@@ -258,7 +258,7 @@ declare namespace Api {
     interface CreateTenantPackageParams {
       packageName: string
       permissionSigns: string[]
-      enableFlag: number
+      enableFlag: boolean
       remark?: string
     }
 

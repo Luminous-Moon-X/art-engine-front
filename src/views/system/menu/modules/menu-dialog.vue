@@ -51,6 +51,8 @@
 
   const { width } = useWindowSize()
   const switchProps = { activeValue: 1, inactiveValue: 0 }
+  // enableFlag 为布尔类型，单独使用布尔开关
+  const enableSwitchProps = { activeValue: true, inactiveValue: false }
 
   /**
    * 创建带 tooltip 的表单标签
@@ -100,7 +102,7 @@
 
   const form = reactive<MenuRowItem & { menuType: 'menu' | 'button' }>({
     id: null,
-    enableFlag: 1,
+    enableFlag: true,
     menuType: 'menu',
     menuName: '',
     routePath: '',
@@ -198,7 +200,7 @@
           label: '是否启用',
           key: 'enableFlag',
           type: 'switch',
-          props: switchProps,
+          props: enableSwitchProps,
           span: switchSpan
         },
         {
@@ -281,7 +283,7 @@
   const resetForm = (): void => {
     formRef.value?.reset()
     form.id = null
-    form.enableFlag = 1
+    form.enableFlag = true
     form.keepAlive = 0
     form.hideFlag = 0
     form.iframeFlag = 0
