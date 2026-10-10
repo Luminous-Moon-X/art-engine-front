@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import fs from 'node:fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -120,8 +121,21 @@ export default ({ mode }: { mode: string }) => {
         'file-saver',
         'vue-img-cutter',
         'element-plus/es',
-        'element-plus/es/components/*/style/css',
-        'element-plus/es/components/*/style/index'
+        // Element Plus 按需样式
+        ...elementPlusStyleDeps(),
+        'md-editor-v3',
+        'markdown-it',
+        'highlight.js/lib/core',
+        'highlight.js/lib/languages/javascript',
+        'highlight.js/lib/languages/typescript',
+        'highlight.js/lib/languages/java',
+        'highlight.js/lib/languages/python',
+        'highlight.js/lib/languages/json',
+        'highlight.js/lib/languages/xml',
+        'highlight.js/lib/languages/css',
+        'highlight.js/lib/languages/sql',
+        'highlight.js/lib/languages/bash',
+        'highlight.js/lib/languages/markdown'
       ]
     },
     css: {
@@ -152,6 +166,23 @@ export default ({ mode }: { mode: string }) => {
   })
 }
 
+function elementPlusStyleDeps(): string[] {
+  const componentsDir = path.resolve(__dirname, 'node_modules/element-plus/es/components')
+  if (!fs.existsSync(componentsDir)) {
+    console.warn(`⚠️  未找到 element-plus 组件目录：${componentsDir}，跳过按需样式预构建`)
+    return []
+  }
+  return fs
+    .readdirSync(componentsDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .flatMap((dirent) =>
+      ['css', 'index']
+        .filter((variant) =>
+          fs.existsSync(path.join(componentsDir, dirent.name, 'style', `${variant}.mjs`))
+        )
+        .map((variant) => `element-plus/es/components/${dirent.name}/style/${variant}`)
+    )
+}
 function resolvePath(paths: string) {
   return path.resolve(__dirname, paths)
 }
