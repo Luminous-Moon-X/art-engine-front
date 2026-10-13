@@ -36,6 +36,7 @@
         :columns="columns"
         :pagination="pagination"
         rowKey="id"
+        @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
@@ -111,6 +112,7 @@
       },
       excludeParams: ['daterange'],
       columnsFactory: () => [
+        { type: 'selection', width: 60 },
         {
           prop: 'id',
           label: 'ID',
@@ -199,6 +201,11 @@
     resetSearchParams()
   }
 
+  // 表格勾选变化
+  const handleSelectionChange = (selection: LoginLogRowItem[]) => {
+    selectedIds.value = selection.map((row) => row.id as number)
+  }
+
   // 删除登录日志
   const handleDelete = (row: LoginLogRowItem) => {
     ElMessageBox.confirm('确定删除该登录日志吗？此操作不可恢复！', '删除确认', {
@@ -207,7 +214,7 @@
       type: 'warning'
     })
       .then(() => {
-        delLoginLog(row.id as number).then((res) => {
+        delLoginLog([row.id as number]).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
             refreshData()
@@ -219,17 +226,22 @@
 
   // 批量删除
   const handleBatchDelete = () => {
-    ElMessageBox.confirm(`确定删除选中的 ${selectedIds.value.length} 条日志吗？`, '批量删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    ElMessageBox.confirm(
+      `确定删除选中的 ${selectedIds.value.length} 条日志吗？此操作不可恢复！`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
       .then(() => {
-        // 逐个删除
-        Promise.all(selectedIds.value.map((id) => delLoginLog(id))).then(() => {
-          ElMessage.success('删除成功')
-          selectedIds.value = []
-          refreshData()
+        delLoginLog(selectedIds.value).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            selectedIds.value = []
+            refreshData()
+          }
         })
       })
       .catch(() => {})

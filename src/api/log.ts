@@ -19,11 +19,11 @@ export function fetchGetLoginLogList(params: LoginLogSearchParams) {
   })
 }
 
-// 删除登录日志
-export function delLoginLog(id: number) {
+// 删除登录日志（支持批量）
+export function delLoginLog(ids: number[]) {
   return request.del<boolean>({
     url: '/api/log/login/delete',
-    data: { ids: [id] }
+    data: { ids }
   })
 }
 
@@ -37,11 +37,11 @@ export function fetchGetMenuLogList(params: MenuLogSearchParams) {
   })
 }
 
-// 删除菜单日志
-export function delMenuLog(id: number) {
+// 删除菜单日志（支持批量）
+export function delMenuLog(ids: number[]) {
   return request.del<boolean>({
     url: '/api/log/menu/delete',
-    data: { ids: [id] }
+    data: { ids }
   })
 }
 
@@ -63,10 +63,10 @@ export function fetchGetApiLogList(params: ApiLogSearchParams) {
   })
 }
 
-// 删除接口日志
-export function delApiLog(id: number) {
+// 删除接口日志（支持批量）
+export function delApiLog(ids: number[]) {
   return request.del<boolean>({
     url: '/api/log/api/delete',
-    data: { ids: [id] }
+    data: { ids }
   })
 }

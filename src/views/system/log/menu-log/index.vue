@@ -36,6 +36,7 @@
         :columns="columns"
         :pagination="pagination"
         rowKey="id"
+        @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
@@ -111,6 +112,7 @@
       },
       excludeParams: ['daterange'],
       columnsFactory: () => [
+        { type: 'selection', width: 60 },
         {
           prop: 'id',
           label: 'ID',
@@ -173,6 +175,11 @@
     resetSearchParams()
   }
 
+  // 表格勾选变化
+  const handleSelectionChange = (selection: MenuLogRowItem[]) => {
+    selectedIds.value = selection.map((row) => row.id as number)
+  }
+
   // 删除菜单日志
   const handleDelete = (row: MenuLogRowItem) => {
     ElMessageBox.confirm('确定删除该菜单日志吗？此操作不可恢复！', '删除确认', {
@@ -181,7 +188,7 @@
       type: 'warning'
     })
       .then(() => {
-        delMenuLog(row.id as number).then((res) => {
+        delMenuLog([row.id as number]).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
             refreshData()
@@ -193,16 +200,22 @@
 
   // 批量删除
   const handleBatchDelete = () => {
-    ElMessageBox.confirm(`确定删除选中的 ${selectedIds.value.length} 条日志吗？`, '批量删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    ElMessageBox.confirm(
+      `确定删除选中的 ${selectedIds.value.length} 条日志吗？此操作不可恢复！`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
       .then(() => {
-        Promise.all(selectedIds.value.map((id) => delMenuLog(id))).then(() => {
-          ElMessage.success('删除成功')
-          selectedIds.value = []
-          refreshData()
+        delMenuLog(selectedIds.value).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            selectedIds.value = []
+            refreshData()
+          }
         })
       })
       .catch(() => {})

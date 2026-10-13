@@ -36,6 +36,7 @@
         :columns="columns"
         :pagination="pagination"
         rowKey="id"
+        @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
       >
@@ -119,6 +120,7 @@
       },
       excludeParams: ['daterange'],
       columnsFactory: () => [
+        { type: 'selection', width: 60 },
         {
           prop: 'id',
           label: 'ID',
@@ -222,6 +224,11 @@
     detailVisible.value = true
   }
 
+  // 表格勾选变化
+  const handleSelectionChange = (selection: ApiLogRowItem[]) => {
+    selectedIds.value = selection.map((row) => row.id as number)
+  }
+
   // 删除接口日志
   const handleDelete = (row: ApiLogRowItem) => {
     ElMessageBox.confirm('确定删除该接口日志吗？此操作不可恢复！', '删除确认', {
@@ -230,7 +237,7 @@
       type: 'warning'
     })
       .then(() => {
-        delApiLog(row.id as number).then((res) => {
+        delApiLog([row.id as number]).then((res) => {
           if (res) {
             ElMessage.success('删除成功')
             refreshData()
@@ -242,16 +249,22 @@
 
   // 批量删除
   const handleBatchDelete = () => {
-    ElMessageBox.confirm(`确定删除选中的 ${selectedIds.value.length} 条日志吗？`, '批量删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    ElMessageBox.confirm(
+      `确定删除选中的 ${selectedIds.value.length} 条日志吗？此操作不可恢复！`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
       .then(() => {
-        Promise.all(selectedIds.value.map((id) => delApiLog(id))).then(() => {
-          ElMessage.success('删除成功')
-          selectedIds.value = []
-          refreshData()
+        delApiLog(selectedIds.value).then((res) => {
+          if (res) {
+            ElMessage.success('删除成功')
+            selectedIds.value = []
+            refreshData()
+          }
         })
       })
       .catch(() => {})
