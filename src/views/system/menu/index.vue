@@ -150,17 +150,32 @@
           }
         },
         {
-          prop: 'orderNum',
-          label: '排序',
-          width: 80
-        },
-        {
           prop: 'routePath',
           label: '路由',
           formatter: (row: MenuRowItem) => {
             if (row.menuType === 'button') return ''
             return row.externalLink || row.routePath || ''
           }
+        },
+        {
+          prop: 'componentPath',
+          label: '组件路径',
+          minWidth: 160,
+          formatter: (row: MenuRowItem) => {
+            // 按钮无组件路径，目录菜单按设计留空
+            if (row.menuType === 'button') return ''
+            return row.componentPath || ''
+          }
+        },
+        {
+          prop: 'permissionSign',
+          label: '授权标识',
+          minWidth: 160
+        },
+        {
+          prop: 'orderNum',
+          label: '排序',
+          width: 80
         },
         {
           prop: 'enableFlag',
