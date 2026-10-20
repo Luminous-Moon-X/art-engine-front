@@ -149,17 +149,19 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 120,
+          width: 180,
           fixed: 'right',
           formatter: (row) =>
             h('div', { style: 'text-align: right' }, [
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 auth: 'system:role:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 auth: 'system:role:delete',
                 onClick: () => handleDelete(row)
               })

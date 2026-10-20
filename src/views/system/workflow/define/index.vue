@@ -348,13 +348,14 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 180,
+          width: 220,
           fixed: 'right',
           align: 'center',
           formatter: (row: WorkflowDefinitionRowItem) =>
             h('div', { style: 'text-align: center' }, [
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonMore, {
@@ -363,6 +364,7 @@
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 onClick: () => handleDelete(row)
               })
             ])

@@ -209,7 +209,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 170,
+          width: 280,
           fixed: 'right',
           align: 'center',
           formatter: (row: UserRowItem) =>
@@ -217,16 +217,19 @@
               h(ArtButtonTable, {
                 icon: 'ri:key-2-line',
                 iconClass: 'bg-warning/12 text-warning',
+                text: '重置密码',
                 auth: 'system:user:resetPassword',
                 onClick: () => handleResetPassword(row)
               }),
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 auth: 'system:user:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 auth: 'system:user:delete',
                 onClick: () => handleDelete(row)
               })

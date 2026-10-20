@@ -157,7 +157,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 170,
+          width: 260,
           fixed: 'right',
           align: 'center',
           formatter: (row: OssConfigRowItem) => {
@@ -167,6 +167,7 @@
                 h(ArtButtonTable, {
                   icon: 'ri:play-circle-line',
                   iconClass: 'bg-success/12 text-success',
+                  text: '启用',
                   auth: 'system:oss-config:enable',
                   onClick: () => handleEnable(row)
                 })
@@ -175,11 +176,13 @@
             buttons.push(
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 auth: 'system:oss-config:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 auth: 'system:oss-config:delete',
                 onClick: () => handleDelete(row)
               })

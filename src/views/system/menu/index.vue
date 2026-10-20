@@ -189,7 +189,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 180,
+          width: 260,
           align: 'center',
           fixed: 'right',
           formatter: (row: MenuRowItem) => {
@@ -199,10 +199,12 @@
               return h('div', buttonStyle, [
                 h(ArtButtonTable, {
                   type: 'edit',
+                  text: '编辑',
                   onClick: () => handleEdit(row)
                 }),
                 h(ArtButtonTable, {
                   type: 'delete',
+                  text: '删除',
                   onClick: () => handleDelete(row)
                 })
               ])
@@ -211,15 +213,18 @@
             return h('div', buttonStyle, [
               h(ArtButtonTable, {
                 type: 'add',
+                text: '新增',
                 onClick: () => handleAddChild(row),
                 title: '添加子菜单'
               }),
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 onClick: () => handleDelete(row)
               })
             ])

@@ -285,10 +285,10 @@
         <!-- 操作列 -->
         <template #operation="{ row }">
           <div class="flex">
-            <ArtButtonTable type="view" :row="row" @click="handleView(row)" />
-            <ArtButtonTable type="add" :row="row" @click="handleAdd()" />
-            <ArtButtonTable type="edit" :row="row" @click="handleEdit(row)" />
-            <ArtButtonTable type="delete" :row="row" @click="handleDelete(row)" />
+            <ArtButtonTable type="view" text="查看" :row="row" @click="handleView(row)" />
+            <ArtButtonTable type="add" text="新增" :row="row" @click="handleAdd()" />
+            <ArtButtonTable type="edit" text="编辑" :row="row" @click="handleEdit(row)" />
+            <ArtButtonTable type="delete" text="删除" :row="row" @click="handleDelete(row)" />
           </div>
         </template>
 
@@ -765,7 +765,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 190,
+          width: 340,
           useSlot: true,
           fixed: 'right'
         }

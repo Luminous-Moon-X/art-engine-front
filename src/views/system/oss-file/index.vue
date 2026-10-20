@@ -127,7 +127,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 140,
+          width: 180,
           fixed: 'right',
           align: 'center',
           formatter: (row: OssFileRowItem) => {
@@ -135,11 +135,13 @@
               h(ArtButtonTable, {
                 icon: 'ri:download-2-line',
                 iconClass: 'bg-theme/12 text-theme',
+                text: '下载',
                 auth: 'system:oss-file:download',
                 onClick: () => handleDownload(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 auth: 'system:oss-file:delete',
                 onClick: () => handleDelete(row)
               })

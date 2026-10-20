@@ -358,7 +358,7 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 160,
+          width: 260,
           fixed: 'right',
           align: 'center',
           formatter: (row: DataPermissionRowItem) => {
@@ -368,6 +368,7 @@
                 h(ArtButtonTable, {
                   icon: 'ri:pause-circle-line',
                   iconClass: 'bg-warning/12 text-warning',
+                  text: '停用',
                   auth: 'system:data-permission:status',
                   onClick: () => handleToggleStatus(row, false)
                 })
@@ -377,6 +378,7 @@
                 h(ArtButtonTable, {
                   icon: 'ri:play-circle-line',
                   iconClass: 'bg-success/12 text-success',
+                  text: '启用',
                   auth: 'system:data-permission:status',
                   onClick: () => handleToggleStatus(row, true)
                 })
@@ -385,11 +387,13 @@
             buttons.push(
               h(ArtButtonTable, {
                 type: 'edit',
+                text: '编辑',
                 auth: 'system:data-permission:edit',
                 onClick: () => handleEdit(row)
               }),
               h(ArtButtonTable, {
                 type: 'delete',
+                text: '删除',
                 auth: 'system:data-permission:delete',
                 onClick: () => handleDelete(row)
               })

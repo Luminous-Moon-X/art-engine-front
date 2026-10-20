@@ -47,6 +47,7 @@
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
   import { fetchTenantPackagePage, deleteTenantPackage } from '@/api/tenant-package'
+  import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import { ElTag, ElMessageBox, ElButton } from 'element-plus'
   import TenantPackageDialog from './modules/tenant-package-dialog.vue'
 
@@ -139,29 +140,21 @@
         {
           prop: 'operation',
           label: '操作',
-          width: 130,
+          width: 180,
           fixed: 'right',
           align: 'center',
           formatter: (row: TenantPackageListItem) =>
-            h('div', { style: 'display: flex; gap: 8px; justify-content: flex-end;' }, [
-              h(
-                ElButton,
-                {
-                  type: 'primary',
-                  link: true,
-                  onClick: () => handleEdit(row)
-                },
-                () => '编辑'
-              ),
-              h(
-                ElButton,
-                {
-                  type: 'danger',
-                  link: true,
-                  onClick: () => handleDelete(row)
-                },
-                () => '删除'
-              )
+            h('div', { style: 'text-align: right' }, [
+              h(ArtButtonTable, {
+                type: 'edit',
+                text: '编辑',
+                onClick: () => handleEdit(row)
+              }),
+              h(ArtButtonTable, {
+                type: 'delete',
+                text: '删除',
+                onClick: () => handleDelete(row)
+              })
             ])
         }
       ]
