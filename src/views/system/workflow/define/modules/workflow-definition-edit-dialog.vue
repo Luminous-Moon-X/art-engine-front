@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { FormInstance, FormRules } from 'element-plus'
+  import type { FormRules } from 'element-plus'
   import { createWorkflowDefinition, updateWorkflowDefinition } from '@/api/workflow'
   import { WorkflowDefinitionRowItem } from '@/types/workflow'
   import type { FormItem } from '@/components/core/forms/art-form/index.vue'
@@ -53,7 +53,8 @@
 
   const emit = defineEmits<Emits>()
 
-  const formRef = ref<FormInstance>()
+  // ArtForm 通过 defineExpose 暴露了 validate、reset 方法，因此按组件实例类型声明
+  const formRef = ref<InstanceType<typeof ArtForm>>()
 
   /**
    * 弹窗显示状态双向绑定
@@ -207,11 +208,15 @@
 
   /**
    * 监听弹窗打开，初始化表单数据
+   * 打开时先重置表单，清除上一次校验失败残留的校验状态
    */
   watch(
     () => props.modelValue,
     (newVal) => {
       if (newVal) {
+        // ArtForm 暴露的是 reset（内部调用 ElForm.resetFields 并清空表单项），
+        // 它能同时重置字段值与校验状态；直接调用 resetFields 会因方法不存在而报错
+        formRef.value?.reset()
         initForm()
       }
     }
@@ -263,11 +268,11 @@
   }
 
   /**
-   * 关闭弹窗并重置表单
+   * 关闭弹窗
+   * 表单重置放在下一次打开时执行：此时表单必定已挂载，且不会在关闭动画期间清空字段
    */
   const handleClose = () => {
     visible.value = false
-    formRef.value?.resetFields()
   }
 
   /**
